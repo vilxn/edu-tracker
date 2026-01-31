@@ -1,171 +1,122 @@
-// debugging.tsx
+// React Native - RegisterScreen.tsx
 import React, { useState } from 'react';
 import {
     View,
     Text,
-    Button,
     TextInput,
+    Button,
     Alert,
-    Platform,
-    ScrollView,
     StyleSheet
 } from 'react-native';
 import axios from 'axios';
 
-const ECHO_API_URL = "http://localhost:3000/users/"
+const API_URL = 'http://localhost:3000/api';
 
-export default function DebuggingScreen() {
-    const [message, setMessage] = useState('Hello from React Native');
-    const [response, setResponse] = useState<string>('');
+export default function RegisterScreen() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const sendEcho = async () => {
-        if (!message.trim()) {
-            Alert.alert('Ошибка', 'Введите сообщение');
+    const handleRegister = async () => {
+        if (!email || !password) {
+            Alert.alert('Ошибка', 'Email и пароль обязательны');
+            return;
+        }
+
+        if (password.length < 6) {
+            Alert.alert('Ошибка', 'Пароль должен быть не менее 6 символов');
             return;
         }
 
         setLoading(true);
-        setResponse('');
 
         try {
-            console.log('📤 Отправка echo запроса на:', ECHO_API_URL);
-            console.log('Сообщение:', message);
+            const response = await axios.post(`${API_URL}/auth/register`, {
+                email,
+                password,
+                name
+            });
 
-            const result = await axios.get(ECHO_API_URL);
+            Alert.alert('Успех', 'Регистрация прошла успешно!');
 
-            console.log('✅ Ответ сервера:', result.data);
+            // Сохраняем токен
+            const { token, user } = response.data;
+            console.log('Токен:', token);
+            console.log('Пользователь:', user);
 
-            setResponse(JSON.stringify(result.data, null, 2));
-
-            Alert.alert(
-                'Успех!',
-                `Сервер ответил: "${result.data.echo || result.data.message}"`
-            );
+            // Можно сохранить токен в AsyncStorage
+            // await AsyncStorage.setItem('token', token);
 
         } catch (error: any) {
-            console.error('❌ Ошибка:', error);
+            console.error('Ошибка регистрации:', error);
 
-            let errorMsg = 'Неизвестная ошибка';
-
-            if (error.response) {
-                errorMsg = `Сервер вернул ошибку ${error.response.status}: ${JSON.stringify(error.response.data)}`;
-            } else if (error.request) {
-                errorMsg = 'Нет ответа от сервера. Проверьте:\n• Сервер запущен?\n• Правильный URL?';
+            if (error.response?.data?.error) {
+                Alert.alert('Ошибка', error.response.data.error);
             } else {
-                errorMsg = error.message;
+                Alert.alert('Ошибка', 'Не удалось зарегистрироваться');
             }
-
-            setResponse(`ОШИБКА:\n${errorMsg}`);
-            Alert.alert('Ошибка соединения', errorMsg);
-
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Echo Endpoint Debugger</Text>
+        <View style={styles.container}>
+            <Text style={styles.title}>Регистрация</Text>
 
-            <Text style={styles.label}>URL:</Text>
-            <Text style={styles.url}>{ECHO_API_URL}</Text>
-
-            <Text style={styles.label}>Введите сообщение:</Text>
             <TextInput
                 style={styles.input}
-                value={message}
-                onChangeText={setMessage}
-                placeholder="Введите текст для эхо..."
-                multiline
+                placeholder="Имя (необязательно)"
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
             />
 
-            <View style={styles.buttonContainer}>
-                <Button
-                    title={loading ? "Отправка..." : "Отправить Echo"}
-                    onPress={sendEcho}
-                    disabled={loading}
-                />
-            </View>
+            <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+            />
 
-            {response ? (
-                <View style={styles.responseContainer}>
-                    <Text style={styles.responseTitle}>Ответ сервера:</Text>
-                    <Text style={styles.responseText}>{response}</Text>
-                </View>
-            ) : (
-                <Text style={styles.placeholder}>
-                    {loading ? 'Ожидание ответа...' : 'Ответ появится здесь'}
-                </Text>
-            )}
-        </ScrollView>
+            <TextInput
+                style={styles.input}
+                placeholder="Пароль (минимум 6 символов)"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+            />
+
+            <Button
+                title={loading ? "Регистрация..." : "Зарегистрироваться"}
+                onPress={handleRegister}
+                disabled={loading}
+            />
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flexGrow: 1,
+        flex: 1,
         padding: 20,
-        backgroundColor: '#f5f5f5',
+        justifyContent: 'center'
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'center',
-        color: '#333',
-    },
-    label: {
-        fontSize: 16,
-        fontWeight: '600',
-        marginTop: 15,
-        marginBottom: 5,
-        color: '#555',
-    },
-    url: {
-        fontSize: 14,
-        fontFamily: Platform.OS === 'ios' ? 'Courier New' : 'monospace',
-        backgroundColor: '#e0e0e0',
-        padding: 10,
-        borderRadius: 5,
-        marginBottom: 10,
+        marginBottom: 30,
+        textAlign: 'center'
     },
     input: {
+        height: 50,
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: 5,
-        padding: 10,
-        fontSize: 16,
-        minHeight: 100,
-        textAlignVertical: 'top',
-        backgroundColor: 'white',
-    },
-    buttonContainer: {
-        marginVertical: 20,
-    },
-    responseContainer: {
-        marginTop: 20,
-        borderWidth: 1,
-        borderColor: '#4CAF50',
-        borderRadius: 5,
-        padding: 15,
-        backgroundColor: '#E8F5E9',
-    },
-    responseTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        color: '#2E7D32',
-    },
-    responseText: {
-        fontSize: 14,
-        fontFamily: Platform.OS === 'ios' ? 'Courier New' : 'monospace',
-        color: '#333',
-    },
-    placeholder: {
-        textAlign: 'center',
-        color: '#999',
-        marginTop: 20,
-        fontStyle: 'italic',
-    },
+        paddingHorizontal: 10,
+        marginBottom: 15
+    }
 });
