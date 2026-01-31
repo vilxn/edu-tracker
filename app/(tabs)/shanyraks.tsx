@@ -12,7 +12,7 @@ import {
     SafeAreaView,
     Dimensions,
     Animated,
-    StatusBar,
+    StatusBar, Platform,
 } from 'react-native';
 import { MaterialIcons, FontAwesome5, AntDesign, Feather } from '@expo/vector-icons';
 import { Colors, Shadows, BorderRadius, Spacing, Typography } from '@/constants/theme'; // Импортируем цветовую схему
@@ -666,19 +666,24 @@ export default function Shanyraks() {
                     <Text style={styles.headerTitle}>Рейтинг Шаныраков</Text>
                     <Text style={styles.headerSubtitle}>Соревнование в реальном времени</Text>
                 </View>
-                <View style={[styles.headerStats, { backgroundColor: Colors.light.neutral[700] + '40' }]}>
-                    <View style={styles.statItem}>
-                        <Text style={styles.statValue}>{shanyraks.length}</Text>
-                        <Text style={styles.statLabel}>Шаныраков</Text>
-                    </View>
-                    <View style={[styles.statDivider, { backgroundColor: Colors.light.neutral[600] + '40' }]} />
-                    <View style={styles.statItem}>
-                        <Text style={styles.statValue}>
-                            {shanyraks.reduce((sum, s) => sum + s.points, 0).toLocaleString()}
-                        </Text>
-                        <Text style={styles.statLabel}>Всего баллов</Text>
-                    </View>
-                </View>
+
+                {
+                    Platform.OS === 'web' ? (
+                        <View style={[styles.headerStats, { backgroundColor: Colors.light.neutral[700] + '40' }]}>
+                            <View style={styles.statItem}>
+                                <Text style={styles.statValue}>{shanyraks.length}</Text>
+                                <Text style={styles.statLabel}>Шаныраков</Text>
+                            </View>
+                            <View style={[styles.statDivider, { backgroundColor: Colors.light.neutral[600] + '40' }]} />
+                            <View style={styles.statItem}>
+                                <Text style={styles.statValue}>
+                                    {shanyraks.reduce((sum, s) => sum + s.points, 0).toLocaleString()}
+                                </Text>
+                                <Text style={styles.statLabel}>Всего баллов</Text>
+                            </View>
+                        </View>) : (<View></View>)
+                }
+
             </View>
             <MaterialIcons
                 name="leaderboard"
@@ -797,7 +802,7 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: Spacing.xl,
-        paddingTop: Spacing.lg,
+        paddingTop: Spacing.lg + 10,
         paddingBottom: Spacing.xl,
         borderBottomLeftRadius: BorderRadius.xxl,
         borderBottomRightRadius: BorderRadius.xxl,

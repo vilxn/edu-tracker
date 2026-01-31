@@ -53,7 +53,7 @@ export default function TabsLayout() {
                 title: '',
                 tabBarIcon: ({color, focused}) =>(
                     <Ionicons
-                        name={focused ? 'people-sharp' : 'people-outline'}
+                        name={focused ? 'aperture-sharp' : 'aperture-outline'}
                         color={color}
                         size={28}
                     />

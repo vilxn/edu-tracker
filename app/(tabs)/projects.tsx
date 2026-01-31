@@ -10,7 +10,7 @@ import {
     FlatList,
     Dimensions,
     Modal,
-    Alert,
+    Alert, Platform,
 } from 'react-native';
 import {
     Ionicons,
@@ -18,7 +18,7 @@ import {
     Feather,
     MaterialCommunityIcons,
 } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
+
 import { Picker } from '@react-native-picker/picker';
 import CustomDatePicker from "@/components/ui/CustomDatePicker";
 
@@ -499,14 +499,6 @@ const EventManagementScreen = () => {
                         <Text style={styles.greeting}>Управление мероприятиями</Text>
                         <Text style={styles.subtitle}>Планируй и организуй школьные события</Text>
                     </View>
-                    <TouchableOpacity
-                        style={styles.roleSwitch}
-                        onPress={() => setUserRole(userRole === 'student' ? 'admin' : 'student')}
-                    >
-                        <Text style={styles.roleText}>
-                            {userRole === 'student' ? 'Ученик' : 'Администратор'}
-                        </Text>
-                    </TouchableOpacity>
                 </View>
 
                 <View style={styles.availabilitySection}>
@@ -518,23 +510,6 @@ const EventManagementScreen = () => {
                         >
                             <Ionicons name="add" size={20} color="#FFF" />
                             <Text style={styles.createButtonText}>Создать заявку</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.dateSelector}>
-                        <TouchableOpacity
-                            style={styles.dateButton}
-                            onPress={() => setShowDatePicker(true)}
-                        >
-                            <Ionicons name="calendar" size={20} color="#6366F1" />
-                            <Text style={styles.dateText}>
-                                {selectedDate.toLocaleDateString('ru-RU', {
-                                    weekday: 'short',
-                                    day: 'numeric',
-                                    month: 'short'
-                                })}
-                            </Text>
-                            <Feather name="chevron-down" size={16} color="#666" />
                         </TouchableOpacity>
                     </View>
 
@@ -562,7 +537,7 @@ const EventManagementScreen = () => {
                             data={getTimeSlotsForLocation()}
                             renderItem={renderTimeSlot}
                             keyExtractor={item => item.time}
-                            numColumns={3}
+                            numColumns={(Platform.OS === 'android') ? 4 : 6}
                             scrollEnabled={false}
                             contentContainerStyle={styles.timeSlotsGrid}
                         />
@@ -581,7 +556,6 @@ const EventManagementScreen = () => {
                 </View>
 
                 <View style={styles.eventsSection}>
-
                     {events.filter(e => e.createdBy === 'Текущий пользователь').length === 0 ? (
                         <View style={styles.emptyState}>
                             <MaterialIcons name="event-note" size={48} color="#9CA3AF" />
@@ -598,34 +572,6 @@ const EventManagementScreen = () => {
                         />
                     )}
                 </View>
-
-                {userRole === 'admin' && (
-                    <View style={styles.adminSection}>
-                        <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionTitle}>Заявки на рассмотрении</Text>
-                            <View style={styles.pendingCount}>
-                                <Text style={styles.pendingCountText}>
-                                    {events.filter(e => e.status === EventStatus.PENDING).length}
-                                </Text>
-                            </View>
-                        </View>
-
-                        {events.filter(e => e.status === EventStatus.PENDING).length === 0 ? (
-                            <View style={styles.emptyState}>
-                                <Ionicons name="checkmark-done-circle" size={48} color="#10B981" />
-                                <Text style={styles.emptyStateText}>Все заявки обработаны</Text>
-                            </View>
-                        ) : (
-                            <FlatList
-                                data={events.filter(e => e.status === EventStatus.PENDING)}
-                                renderItem={renderEventCard}
-                                keyExtractor={item => item.id}
-                                scrollEnabled={false}
-                                contentContainerStyle={styles.eventsList}
-                            />
-                        )}
-                    </View>
-                )}
             </ScrollView>
 
             <Modal
@@ -767,7 +713,6 @@ const EventManagementScreen = () => {
                                 </TouchableOpacity>
                             </View>
                         </ScrollView>
-
                         <View style={styles.modalFooter}>
                             <TouchableOpacity
                                 style={styles.cancelButton}
@@ -899,15 +844,6 @@ const EventManagementScreen = () => {
                     </View>
                 </View>
             </Modal>
-
-            {showTimePicker && (
-                <DateTimePicker
-                    value={new Date(`2000-01-01T${timePickerMode === 'start' ? newEvent.startTime : newEvent.endTime}:00`)}
-                    mode="time"
-                    display="default"
-                    onChange={handleTimeChange}
-                />
-            )}
         </SafeAreaView>
     );
 };
@@ -919,10 +855,10 @@ const styles = StyleSheet.create({
     },
     header: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
         alignItems: 'center',
         paddingHorizontal: 20,
-        paddingTop: 10,
+        paddingTop: 30,
         paddingBottom: 20,
     },
     greeting: {
@@ -934,17 +870,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#6B7280',
         marginTop: 4,
-    },
-    roleSwitch: {
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        backgroundColor: '#6366F1',
-        borderRadius: 20,
-    },
-    roleText: {
-        fontSize: 12,
-        color: '#FFF',
-        fontWeight: '600',
     },
     availabilitySection: {
         backgroundColor: '#FFF',
