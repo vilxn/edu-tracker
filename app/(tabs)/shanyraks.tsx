@@ -534,14 +534,14 @@ export default function Shanyraks() {
         },
         {
             id: '4',
-            name: 'Тулпар',
+            name: 'Тұлпар',
             points: 980,
             members: 22,
             color: Colors.light.categories.hackathon
         },
         {
             id: '5',
-            name: 'Көкше',
+            name: 'Манғыстау',
             points: 875,
             members: 26,
             color: Colors.light.warning
