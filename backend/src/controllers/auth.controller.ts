@@ -14,43 +14,37 @@ export const register = async (req: Request, res: Response) => {
     try {
         const { email, password, name } = req.body;
 
-        if (!email || !password) {
-            return res.status(400).json({
-                error: 'Email и пароль обязательны'
-            });
-        }
+        // if (!email || !password) {
+        //     return res.status(400).json({
+        //         error: 'Email и пароль обязательны'
+        //     });
+        // }
+        //
+        // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        // if (!emailRegex.test(email)) {
+        //     return res.status(400).json({
+        //         error: 'Неверный формат email'
+        //     });
+        // }
+        //
+        // if (password.length < 6) {
+        //     return res.status(400).json({
+        //         error: 'Пароль должен быть не менее 6 символов'
+        //     });
+        // }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return res.status(400).json({
-                error: 'Неверный формат email'
-            });
-        }
+        // const existingUser = await prisma.user.findUnique({
+        //     where: { email }
+        // });
 
-        if (password.length < 6) {
-            return res.status(400).json({
-                error: 'Пароль должен быть не менее 6 символов'
-            });
-        }
-
-        const existingUser = await prisma.user.findUnique({
-            where: { email }
-        });
-
-        if (existingUser) {
-            return res.status(409).json({
-                error: 'Пользователь с таким email уже существует'
-            });
-        }
+        // if (existingUser) {
+        //     return res.status(409).json({
+        //         error: 'Пользователь с таким email уже существует'
+        //     });
+        // }
 
         const user = await prisma.user.create({
-            data: {
-                email,
-                password: password,
-                name: name || null,
-                verificationToken: Math.random().toString(36).substring(2) +
-                    Date.now().toString(36)
-            }
+            data: { email, password, name }
         });
 
         // const token = jwt.sign(
@@ -65,14 +59,11 @@ export const register = async (req: Request, res: Response) => {
 
         // 8. Удаление пароля из ответа
         const userResponse = {
-            id: user.id,
             email: user.email,
             name: user.name,
-            role: user.role,
             createdAt: user.createdAt
         };
 
-        // 9. Отправка ответа
         res.status(201).json({
             message: 'Пользователь успешно зарегистрирован',
             user: userResponse,
@@ -117,7 +108,6 @@ export const login = async (req: Request, res: Response) => {
             {
                 userId: user.id,
                 email: user.email,
-                role: user.role
             },
             JWT_SECRET,
             { expiresIn: '7d' }
@@ -128,7 +118,6 @@ export const login = async (req: Request, res: Response) => {
             id: user.id,
             email: user.email,
             name: user.name,
-            role: user.role,
             createdAt: user.createdAt
         };
 

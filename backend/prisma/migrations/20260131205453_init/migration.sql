@@ -1,9 +1,9 @@
 -- CreateTable
 CREATE TABLE "User" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "role" TEXT NOT NULL DEFAULT 'student',
+    "password" TEXT NOT NULL,
+    "name" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
