@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
     View,
     Text,
@@ -47,38 +47,34 @@ export default function HomeScreen() {
     const [settingsVisible, setSettingsVisible] = useState(false);
     const [helpVisible, setHelpVisible] = useState(false);
 
-    // Состояния для анимаций
-    const [fadeAnim] = useState(new Animated.Value(0));
-    const [slideAnim] = useState(new Animated.Value(50));
+    // Отдельные анимационные значения для каждого модального окна
+    const profileFadeAnim = useRef(new Animated.Value(0)).current;
+    const profileSlideAnim = useRef(new Animated.Value(50)).current;
+
+    const personalFadeAnim = useRef(new Animated.Value(0)).current;
+    const personalSlideAnim = useRef(new Animated.Value(50)).current;
+
+    const settingsFadeAnim = useRef(new Animated.Value(0)).current;
+    const settingsSlideAnim = useRef(new Animated.Value(50)).current;
+
+    const helpFadeAnim = useRef(new Animated.Value(0)).current;
+    const helpSlideAnim = useRef(new Animated.Value(50)).current;
 
     // Состояния для настроек
     const [notifications, setNotifications] = useState(true);
     const [darkMode, setDarkMode] = useState(false);
     const [language, setLanguage] = useState('Русский');
 
-    // Функции для открытия модальных окон
-    const openModal = (modalType: 'profile' | 'personal' | 'settings' | 'help') => {
-        switch(modalType) {
-            case 'profile':
-                setProfileVisible(true);
-                break;
-            case 'personal':
-                setPersonalDataVisible(true);
-                break;
-            case 'settings':
-                setSettingsVisible(true);
-                break;
-            case 'help':
-                setHelpVisible(true);
-                break;
-        }
+    // Функции для открытия модальных окон с анимацией
+    const openProfileModal = () => {
+        setProfileVisible(true);
         Animated.parallel([
-            Animated.timing(fadeAnim, {
+            Animated.timing(profileFadeAnim, {
                 toValue: 1,
                 duration: 300,
                 useNativeDriver: true,
             }),
-            Animated.timing(slideAnim, {
+            Animated.timing(profileSlideAnim, {
                 toValue: 0,
                 duration: 300,
                 useNativeDriver: true,
@@ -86,34 +82,112 @@ export default function HomeScreen() {
         ]).start();
     };
 
-    const closeModal = (modalType: 'profile' | 'personal' | 'settings' | 'help') => {
+    const closeProfileModal = () => {
         Animated.parallel([
-            Animated.timing(fadeAnim, {
+            Animated.timing(profileFadeAnim, {
                 toValue: 0,
                 duration: 200,
                 useNativeDriver: true,
             }),
-            Animated.timing(slideAnim, {
+            Animated.timing(profileSlideAnim, {
                 toValue: 50,
                 duration: 200,
                 useNativeDriver: true,
             })
-        ]).start(() => {
-            switch(modalType) {
-                case 'profile':
-                    setProfileVisible(false);
-                    break;
-                case 'personal':
-                    setPersonalDataVisible(false);
-                    break;
-                case 'settings':
-                    setSettingsVisible(false);
-                    break;
-                case 'help':
-                    setHelpVisible(false);
-                    break;
-            }
-        });
+        ]).start(() => setProfileVisible(false));
+    };
+
+    const openPersonalModal = () => {
+        setPersonalDataVisible(true);
+        Animated.parallel([
+            Animated.timing(personalFadeAnim, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+            Animated.timing(personalSlideAnim, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            })
+        ]).start();
+    };
+
+    const closePersonalModal = () => {
+        Animated.parallel([
+            Animated.timing(personalFadeAnim, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: true,
+            }),
+            Animated.timing(personalSlideAnim, {
+                toValue: 50,
+                duration: 200,
+                useNativeDriver: true,
+            })
+        ]).start(() => setPersonalDataVisible(false));
+    };
+
+    const openSettingsModal = () => {
+        setSettingsVisible(true);
+        Animated.parallel([
+            Animated.timing(settingsFadeAnim, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+            Animated.timing(settingsSlideAnim, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            })
+        ]).start();
+    };
+
+    const closeSettingsModal = () => {
+        Animated.parallel([
+            Animated.timing(settingsFadeAnim, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: true,
+            }),
+            Animated.timing(settingsSlideAnim, {
+                toValue: 50,
+                duration: 200,
+                useNativeDriver: true,
+            })
+        ]).start(() => setSettingsVisible(false));
+    };
+
+    const openHelpModal = () => {
+        setHelpVisible(true);
+        Animated.parallel([
+            Animated.timing(helpFadeAnim, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+            Animated.timing(helpSlideAnim, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            })
+        ]).start();
+    };
+
+    const closeHelpModal = () => {
+        Animated.parallel([
+            Animated.timing(helpFadeAnim, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: true,
+            }),
+            Animated.timing(helpSlideAnim, {
+                toValue: 50,
+                duration: 200,
+                useNativeDriver: true,
+            })
+        ]).start(() => setHelpVisible(false));
     };
 
     // Данные для статистики
@@ -162,23 +236,266 @@ export default function HomeScreen() {
         { title: 'Забронирован актовый зал на мероприятие "День науки"', time: '2 дня назад', icon: 'calendar-check' },
     ];
 
-    // Рендер модального окна
-    const renderModal = (content: React.ReactNode, title: string, type: 'profile' | 'personal' | 'settings' | 'help') => (
+    // Рендер модального окна с правильными анимациями
+    const renderProfileModal = () => (
         <Modal
             animationType="fade"
             transparent={true}
-            visible={true}
-            onRequestClose={() => closeModal(type)}
+            visible={profileVisible}
+            onRequestClose={closeProfileModal}
         >
-            <Animated.View style={[styles.modalOverlay, { opacity: fadeAnim }]}>
-                <Animated.View style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}>
+            <Animated.View style={[styles.modalOverlay, { opacity: profileFadeAnim }]}>
+                <Animated.View style={[styles.modalContent, { transform: [{ translateY: profileSlideAnim }] }]}>
                     <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>{title}</Text>
-                        <TouchableOpacity onPress={() => closeModal(type)} style={styles.closeButton}>
+                        <Text style={styles.modalTitle}>Профиль</Text>
+                        <TouchableOpacity onPress={closeProfileModal} style={styles.closeButton}>
                             <AntDesign name="close" size={24} color="#666" />
                         </TouchableOpacity>
                     </View>
-                    {content}
+                    <View style={styles.modalBody}>
+                        <View style={styles.profileInfo}>
+                            <LinearGradient
+                                colors={GRADIENTS.primary}
+                                style={styles.profileImage}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                            >
+                                <MaterialIcons name="person" size={40} color="white" />
+                            </LinearGradient>
+                            <Text style={styles.profileName}>Айсултан Ахметов</Text>
+                            <Text style={styles.profileEmail}>aisultan@school.kz</Text>
+                            <View style={styles.profileStats}>
+                                <View style={styles.profileStat}>
+                                    <Text style={styles.profileStatValue}>8</Text>
+                                    <Text style={styles.profileStatLabel}>Шаныраков</Text>
+                                </View>
+                                <View style={styles.profileStat}>
+                                    <Text style={styles.profileStatValue}>24</Text>
+                                    <Text style={styles.profileStatLabel}>Мероприятий</Text>
+                                </View>
+                                <View style={styles.profileStat}>
+                                    <Text style={styles.profileStatValue}>156</Text>
+                                    <Text style={styles.profileStatLabel}>Баллов</Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.profileMenu}>
+                            <TouchableOpacity
+                                style={styles.menuItem}
+                                onPress={() => {
+                                    closeProfileModal();
+                                    setTimeout(() => openPersonalModal(), 100);
+                                }}
+                            >
+                                <Feather name="user" size={22} color={PRIMARY_PURPLE} />
+                                <Text style={styles.menuText}>Личные данные</Text>
+                                <MaterialIcons name="chevron-right" size={24} color="#999" />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.menuItem}
+                                onPress={() => {
+                                    closeProfileModal();
+                                    setTimeout(() => openSettingsModal(), 100);
+                                }}
+                            >
+                                <Feather name="settings" size={22} color={PRIMARY_PURPLE} />
+                                <Text style={styles.menuText}>Настройки</Text>
+                                <MaterialIcons name="chevron-right" size={24} color="#999" />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.menuItem}
+                                onPress={() => {
+                                    closeProfileModal();
+                                    setTimeout(() => openHelpModal(), 100);
+                                }}
+                            >
+                                <Feather name="help-circle" size={22} color={PRIMARY_PURPLE} />
+                                <Text style={styles.menuText}>Помощь</Text>
+                                <MaterialIcons name="chevron-right" size={24} color="#999" />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.menuItem}>
+                                <Feather name="log-out" size={22} color={ERROR_RED} />
+                                <Text style={[styles.menuText, { color: ERROR_RED }]}>Выйти</Text>
+                                <MaterialIcons name="chevron-right" size={24} color="#999" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Animated.View>
+            </Animated.View>
+        </Modal>
+    );
+
+    const renderPersonalModal = () => (
+        <Modal
+            animationType="fade"
+            transparent={true}
+            visible={personalDataVisible}
+            onRequestClose={closePersonalModal}
+        >
+            <Animated.View style={[styles.modalOverlay, { opacity: personalFadeAnim }]}>
+                <Animated.View style={[styles.modalContent, { transform: [{ translateY: personalSlideAnim }] }]}>
+                    <View style={styles.modalHeader}>
+                        <Text style={styles.modalTitle}>Личные данные</Text>
+                        <TouchableOpacity onPress={closePersonalModal} style={styles.closeButton}>
+                            <AntDesign name="close" size={24} color="#666" />
+                        </TouchableOpacity>
+                    </View>
+                    <ScrollView style={styles.modalBody}>
+                        <View style={styles.formGroup}>
+                            <Text style={styles.formLabel}>Имя и фамилия</Text>
+                            <TextInput
+                                style={styles.input}
+                                defaultValue="Айсултан Ахметов"
+                                placeholder="Введите имя и фамилию"
+                            />
+                        </View>
+
+                        <View style={styles.formGroup}>
+                            <Text style={styles.formLabel}>Электронная почта</Text>
+                            <TextInput
+                                style={styles.input}
+                                defaultValue="aisultan@school.kz"
+                                placeholder="Введите email"
+                                keyboardType="email-address"
+                            />
+                        </View>
+
+                        <View style={styles.formGroup}>
+                            <Text style={styles.formLabel}>Класс</Text>
+                            <TextInput
+                                style={styles.input}
+                                defaultValue="11A"
+                                placeholder="Введите класс"
+                            />
+                        </View>
+
+                        <View style={styles.formGroup}>
+                            <Text style={styles.formLabel}>Телефон</Text>
+                            <TextInput
+                                style={styles.input}
+                                defaultValue="+7 777 123 45 67"
+                                placeholder="Введите телефон"
+                                keyboardType="phone-pad"
+                            />
+                        </View>
+
+                        <TouchableOpacity style={styles.saveButton}>
+                            <Text style={styles.saveButtonText}>Сохранить изменения</Text>
+                        </TouchableOpacity>
+                    </ScrollView>
+                </Animated.View>
+            </Animated.View>
+        </Modal>
+    );
+
+    const renderSettingsModal = () => (
+        <Modal
+            animationType="fade"
+            transparent={true}
+            visible={settingsVisible}
+            onRequestClose={closeSettingsModal}
+        >
+            <Animated.View style={[styles.modalOverlay, { opacity: settingsFadeAnim }]}>
+                <Animated.View style={[styles.modalContent, { transform: [{ translateY: settingsSlideAnim }] }]}>
+                    <View style={styles.modalHeader}>
+                        <Text style={styles.modalTitle}>Настройки</Text>
+                        <TouchableOpacity onPress={closeSettingsModal} style={styles.closeButton}>
+                            <AntDesign name="close" size={24} color="#666" />
+                        </TouchableOpacity>
+                    </View>
+                    <ScrollView style={styles.modalBody}>
+                        <View style={styles.settingItem}>
+                            <View>
+                                <Text style={styles.settingTitle}>Уведомления</Text>
+                                <Text style={styles.settingDescription}>Получать уведомления о новых мероприятиях</Text>
+                            </View>
+                            <Switch
+                                value={notifications}
+                                onValueChange={setNotifications}
+                                trackColor={{ false: '#E5E7EB', true: PRIMARY_PURPLE }}
+                            />
+                        </View>
+
+                        <View style={styles.settingItem}>
+                            <View>
+                                <Text style={styles.settingTitle}>Темная тема</Text>
+                                <Text style={styles.settingDescription}>Использовать темную тему оформления</Text>
+                            </View>
+                            <Switch
+                                value={darkMode}
+                                onValueChange={setDarkMode}
+                                trackColor={{ false: '#E5E7EB', true: PRIMARY_PURPLE }}
+                            />
+                        </View>
+
+                        <View style={styles.settingItem}>
+                            <View>
+                                <Text style={styles.settingTitle}>Язык</Text>
+                                <Text style={styles.settingDescription}>Язык интерфейса приложения</Text>
+                            </View>
+                            <TouchableOpacity style={styles.languageButton}>
+                                <Text style={styles.languageText}>{language}</Text>
+                                <MaterialIcons name="arrow-drop-down" size={24} color={NEUTRAL_GRAY} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <TouchableOpacity style={styles.saveButton}>
+                            <Text style={styles.saveButtonText}>Применить настройки</Text>
+                        </TouchableOpacity>
+                    </ScrollView>
+                </Animated.View>
+            </Animated.View>
+        </Modal>
+    );
+
+    const renderHelpModal = () => (
+        <Modal
+            animationType="fade"
+            transparent={true}
+            visible={helpVisible}
+            onRequestClose={closeHelpModal}
+        >
+            <Animated.View style={[styles.modalOverlay, { opacity: helpFadeAnim }]}>
+                <Animated.View style={[styles.modalContent, { transform: [{ translateY: helpSlideAnim }] }]}>
+                    <View style={styles.modalHeader}>
+                        <Text style={styles.modalTitle}>Помощь</Text>
+                        <TouchableOpacity onPress={closeHelpModal} style={styles.closeButton}>
+                            <AntDesign name="close" size={24} color="#666" />
+                        </TouchableOpacity>
+                    </View>
+                    <ScrollView style={styles.modalBody}>
+                        <View style={styles.helpSection}>
+                            <Text style={styles.helpTitle}>Часто задаваемые вопросы</Text>
+                            <View style={styles.faqItem}>
+                                <Text style={styles.faqQuestion}>Как подать отчет о мероприятии?</Text>
+                                <Text style={styles.faqAnswer}>Перейдите в раздел "Цифровые Шаныраки" и нажмите "Подать отчет"</Text>
+                            </View>
+                            <View style={styles.faqItem}>
+                                <Text style={styles.faqQuestion}>Как забронировать локацию?</Text>
+                                <Text style={styles.faqAnswer}>В разделе "Event Management" выберите дату и свободную локацию</Text>
+                            </View>
+                            <View style={styles.faqItem}>
+                                <Text style={styles.faqQuestion}>Как вступить в команду проекта?</Text>
+                                <Text style={styles.faqAnswer}>В разделе "Проекты и Олимпиады" выберите интересующий проект и подайте заявку</Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.helpSection}>
+                            <Text style={styles.helpTitle}>Техническая поддержка</Text>
+                            <TouchableOpacity style={styles.supportButton}>
+                                <Feather name="mail" size={20} color={PRIMARY_PURPLE} />
+                                <Text style={styles.supportButtonText}>support@school.kz</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.supportButton}>
+                                <Feather name="phone" size={20} color={PRIMARY_PURPLE} />
+                                <Text style={styles.supportButtonText}>+7 777 000 00 00</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </ScrollView>
                 </Animated.View>
             </Animated.View>
         </Modal>
@@ -195,7 +512,7 @@ export default function HomeScreen() {
                 </View>
                 <TouchableOpacity
                     style={styles.profileButton}
-                    onPress={() => openModal('profile')}
+                    onPress={openProfileModal}
                 >
                     <LinearGradient
                         colors={GRADIENTS.primary}
@@ -314,213 +631,11 @@ export default function HomeScreen() {
                 </View>
             </ScrollView>
 
-            {/* Модальное окно профиля */}
-            {profileVisible && renderModal(
-                <View style={styles.modalBody}>
-                    <View style={styles.profileInfo}>
-                        <LinearGradient
-                            colors={GRADIENTS.primary}
-                            style={styles.profileImage}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                        >
-                            <MaterialIcons name="person" size={40} color="white" />
-                        </LinearGradient>
-                        <Text style={styles.profileName}>Айсултан Ахметов</Text>
-                        <Text style={styles.profileEmail}>aisultan@school.kz</Text>
-                        <View style={styles.profileStats}>
-                            <View style={styles.profileStat}>
-                                <Text style={styles.profileStatValue}>8</Text>
-                                <Text style={styles.profileStatLabel}>Шаныраков</Text>
-                            </View>
-                            <View style={styles.profileStat}>
-                                <Text style={styles.profileStatValue}>24</Text>
-                                <Text style={styles.profileStatLabel}>Мероприятий</Text>
-                            </View>
-                            <View style={styles.profileStat}>
-                                <Text style={styles.profileStatValue}>156</Text>
-                                <Text style={styles.profileStatLabel}>Баллов</Text>
-                            </View>
-                        </View>
-                    </View>
-
-                    <View style={styles.profileMenu}>
-                        <TouchableOpacity
-                            style={styles.menuItem}
-                            onPress={() => {
-                                closeModal('profile');
-                                setTimeout(() => openModal('personal'), 100);
-                            }}
-                        >
-                            <Feather name="user" size={22} color={PRIMARY_PURPLE} />
-                            <Text style={styles.menuText}>Личные данные</Text>
-                            <MaterialIcons name="chevron-right" size={24} color="#999" />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={styles.menuItem}
-                            onPress={() => {
-                                closeModal('profile');
-                                setTimeout(() => openModal('settings'), 100);
-                            }}
-                        >
-                            <Feather name="settings" size={22} color={PRIMARY_PURPLE} />
-                            <Text style={styles.menuText}>Настройки</Text>
-                            <MaterialIcons name="chevron-right" size={24} color="#999" />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={styles.menuItem}
-                            onPress={() => {
-                                closeModal('profile');
-                                setTimeout(() => openModal('help'), 100);
-                            }}
-                        >
-                            <Feather name="help-circle" size={22} color={PRIMARY_PURPLE} />
-                            <Text style={styles.menuText}>Помощь</Text>
-                            <MaterialIcons name="chevron-right" size={24} color="#999" />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.menuItem}>
-                            <Feather name="log-out" size={22} color={ERROR_RED} />
-                            <Text style={[styles.menuText, { color: ERROR_RED }]}>Выйти</Text>
-                            <MaterialIcons name="chevron-right" size={24} color="#999" />
-                        </TouchableOpacity>
-                    </View>
-                </View>,
-                'Профиль',
-                'profile'
-            )}
-
-            {/* Модальное окно личных данных */}
-            {personalDataVisible && renderModal(
-                <ScrollView style={styles.modalBody}>
-                    <View style={styles.formGroup}>
-                        <Text style={styles.formLabel}>Имя и фамилия</Text>
-                        <TextInput
-                            style={styles.input}
-                            defaultValue="Айсултан Ахметов"
-                            placeholder="Введите имя и фамилию"
-                        />
-                    </View>
-
-                    <View style={styles.formGroup}>
-                        <Text style={styles.formLabel}>Электронная почта</Text>
-                        <TextInput
-                            style={styles.input}
-                            defaultValue="aisultan@school.kz"
-                            placeholder="Введите email"
-                            keyboardType="email-address"
-                        />
-                    </View>
-
-                    <View style={styles.formGroup}>
-                        <Text style={styles.formLabel}>Класс</Text>
-                        <TextInput
-                            style={styles.input}
-                            defaultValue="11A"
-                            placeholder="Введите класс"
-                        />
-                    </View>
-
-                    <View style={styles.formGroup}>
-                        <Text style={styles.formLabel}>Телефон</Text>
-                        <TextInput
-                            style={styles.input}
-                            defaultValue="+7 777 123 45 67"
-                            placeholder="Введите телефон"
-                            keyboardType="phone-pad"
-                        />
-                    </View>
-
-                    <TouchableOpacity style={styles.saveButton}>
-                        <Text style={styles.saveButtonText}>Сохранить изменения</Text>
-                    </TouchableOpacity>
-                </ScrollView>,
-                'Личные данные',
-                'personal'
-            )}
-
-            {/* Модальное окно настроек */}
-            {settingsVisible && renderModal(
-                <ScrollView style={styles.modalBody}>
-                    <View style={styles.settingItem}>
-                        <View>
-                            <Text style={styles.settingTitle}>Уведомления</Text>
-                            <Text style={styles.settingDescription}>Получать уведомления о новых мероприятиях</Text>
-                        </View>
-                        <Switch
-                            value={notifications}
-                            onValueChange={setNotifications}
-                            trackColor={{ false: '#E5E7EB', true: PRIMARY_PURPLE }}
-                        />
-                    </View>
-
-                    <View style={styles.settingItem}>
-                        <View>
-                            <Text style={styles.settingTitle}>Темная тема</Text>
-                            <Text style={styles.settingDescription}>Использовать темную тему оформления</Text>
-                        </View>
-                        <Switch
-                            value={darkMode}
-                            onValueChange={setDarkMode}
-                            trackColor={{ false: '#E5E7EB', true: PRIMARY_PURPLE }}
-                        />
-                    </View>
-
-                    <View style={styles.settingItem}>
-                        <View>
-                            <Text style={styles.settingTitle}>Язык</Text>
-                            <Text style={styles.settingDescription}>Язык интерфейса приложения</Text>
-                        </View>
-                        <TouchableOpacity style={styles.languageButton}>
-                            <Text style={styles.languageText}>{language}</Text>
-                            <MaterialIcons name="arrow-drop-down" size={24} color={NEUTRAL_GRAY} />
-                        </TouchableOpacity>
-                    </View>
-
-                    <TouchableOpacity style={styles.saveButton}>
-                        <Text style={styles.saveButtonText}>Применить настройки</Text>
-                    </TouchableOpacity>
-                </ScrollView>,
-                'Настройки',
-                'settings'
-            )}
-
-            {/* Модальное окно помощи */}
-            {helpVisible && renderModal(
-                <ScrollView style={styles.modalBody}>
-                    <View style={styles.helpSection}>
-                        <Text style={styles.helpTitle}>Часто задаваемые вопросы</Text>
-                        <View style={styles.faqItem}>
-                            <Text style={styles.faqQuestion}>Как подать отчет о мероприятии?</Text>
-                            <Text style={styles.faqAnswer}>Перейдите в раздел "Цифровые Шаныраки" и нажмите "Подать отчет"</Text>
-                        </View>
-                        <View style={styles.faqItem}>
-                            <Text style={styles.faqQuestion}>Как забронировать локацию?</Text>
-                            <Text style={styles.faqAnswer}>В разделе "Event Management" выберите дату и свободную локацию</Text>
-                        </View>
-                        <View style={styles.faqItem}>
-                            <Text style={styles.faqQuestion}>Как вступить в команду проекта?</Text>
-                            <Text style={styles.faqAnswer}>В разделе "Проекты и Олимпиады" выберите интересующий проект и подайте заявку</Text>
-                        </View>
-                    </View>
-
-                    <View style={styles.helpSection}>
-                        <Text style={styles.helpTitle}>Техническая поддержка</Text>
-                        <TouchableOpacity style={styles.supportButton}>
-                            <Feather name="mail" size={20} color={PRIMARY_PURPLE} />
-                            <Text style={styles.supportButtonText}>support@school.kz</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.supportButton}>
-                            <Feather name="phone" size={20} color={PRIMARY_PURPLE} />
-                            <Text style={styles.supportButtonText}>+7 777 000 00 00</Text>
-                        </TouchableOpacity>
-                    </View>
-                </ScrollView>,
-                'Помощь',
-                'help'
-            )}
+            {/* Модальные окна */}
+            {renderProfileModal()}
+            {renderPersonalModal()}
+            {renderSettingsModal()}
+            {renderHelpModal()}
         </SafeAreaView>
     );
 }
