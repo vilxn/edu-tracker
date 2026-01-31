@@ -48,3 +48,13 @@ export const deleteUser = async (req: Request, res: Response) => {
 
     res.json({ message: "User deleted" });
 };
+
+export const testAPI = async (req: Request, res: Response) => {
+    const message = String(req.params.message);
+    console.log(message);
+    res.json({ message: "Test API" });
+}
+
+export const getTest = async (req: Request, res: Response) => {
+
+}
