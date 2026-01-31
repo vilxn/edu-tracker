@@ -1,20 +1,39 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, Modal, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { MaterialIcons, FontAwesome5, Ionicons, AntDesign } from '@expo/vector-icons';
 import { AppRoute } from '@/constants/navigation';
 
-// Цвета в темно-синей и фиолетовой палитре
-const DARK_PURPLE = '#2D1B69';
-const PURPLE = '#4A2FBD';
-const BLUE = '#1E40AF';
-const LIGHT_BLUE = '#3B82F6';
-const DARK_BLUE = '#1E3A8A';
+// Светлая цветовая палитра
 const LIGHT_PURPLE = '#7C3AED';
+const PURPLE = '#8B5CF6';
+const BLUE = '#3B82F6';
+const LIGHT_BLUE = '#60A5FA';
+const DARK_BLUE = '#1E40AF';
+const ACCENT_PURPLE = '#A78BFA';
 
 export default function HomeScreen() {
     const router = useRouter();
+    const [profileVisible, setProfileVisible] = useState(false);
+    const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+    const openProfile = () => {
+        setProfileVisible(true);
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const closeProfile = () => {
+        Animated.timing(fadeAnim, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: true,
+        }).start(() => setProfileVisible(false));
+    };
 
     const stats = [
         { label: 'Активных шаныраков', value: '12', icon: 'trophy' },
@@ -56,10 +75,8 @@ export default function HomeScreen() {
             description: 'Команды и конкурсы',
             route: '/projects',
             icon: 'lightbulb',
-            color: '#3B82F6'
+            color: BLUE
         },
-
-
     ];
 
     const recentActivities = [
@@ -78,7 +95,7 @@ export default function HomeScreen() {
                 </View>
                 <TouchableOpacity
                     style={styles.profileButton}
-                    onPress={() => router.push('/profile')}
+                    onPress={openProfile}
                 >
                     <LinearGradient
                         colors={[PURPLE, LIGHT_PURPLE]}
@@ -97,19 +114,13 @@ export default function HomeScreen() {
                     <Text style={styles.sectionTitle}>Общая статистика</Text>
                     <View style={styles.statsGrid}>
                         {stats.map((stat, index) => (
-                            <LinearGradient
-                                key={index}
-                                colors={[DARK_BLUE, BLUE]}
-                                style={styles.statCard}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 1 }}
-                            >
-                                <View style={styles.statIconContainer}>
-                                    <FontAwesome5 name={stat.icon} size={20} color="white" />
+                            <View key={index} style={styles.statCard}>
+                                <View style={[styles.statIconContainer, { backgroundColor: `${PURPLE}20` }]}>
+                                    <FontAwesome5 name={stat.icon} size={20} color={PURPLE} />
                                 </View>
                                 <Text style={styles.statValue}>{stat.value}</Text>
                                 <Text style={styles.statLabel}>{stat.label}</Text>
-                            </LinearGradient>
+                            </View>
                         ))}
                     </View>
                 </View>
@@ -121,25 +132,20 @@ export default function HomeScreen() {
                         {quickActions.map((action, index) => (
                             <TouchableOpacity
                                 key={index}
-                                style={styles.actionCard}
+                                style={[styles.actionCard, { borderLeftColor: action.color }]}
                                 onPress={() => router.push(action.route)}
                                 activeOpacity={0.8}
                             >
-                                <LinearGradient
-                                    colors={[DARK_PURPLE, PURPLE]}
-                                    style={[styles.actionGradient, { borderColor: action.color }]}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 1 }}
-                                >
-                                    <View style={styles.actionIconContainer}>
-                                        <FontAwesome5 name={action.icon} size={24} color="white" />
+                                <View style={styles.actionContent}>
+                                    <View style={[styles.actionIconContainer, { backgroundColor: `${action.color}20` }]}>
+                                        <FontAwesome5 name={action.icon} size={24} color={action.color} />
                                     </View>
                                     <Text style={styles.actionTitle}>{action.title}</Text>
                                     <Text style={styles.actionDescription}>{action.description}</Text>
                                     <View style={styles.actionArrow}>
-                                        <MaterialIcons name="arrow-forward" size={20} color="white" />
+                                        <MaterialIcons name="arrow-forward" size={20} color={action.color} />
                                     </View>
-                                </LinearGradient>
+                                </View>
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -193,6 +199,79 @@ export default function HomeScreen() {
                     <Text style={styles.footerSubtext}>Объединяем школу в цифровом пространстве</Text>
                 </View>
             </ScrollView>
+
+            {/* Модальное окно профиля */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={profileVisible}
+                onRequestClose={closeProfile}
+            >
+                <Animated.View style={[styles.modalOverlay, { opacity: fadeAnim }]}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Профиль</Text>
+                            <TouchableOpacity onPress={closeProfile} style={styles.closeButton}>
+                                <AntDesign name="close" size={24} color="#666" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.profileInfo}>
+                            <LinearGradient
+                                colors={[PURPLE, LIGHT_PURPLE]}
+                                style={styles.profileImage}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                            >
+                                <MaterialIcons name="person" size={40} color="white" />
+                            </LinearGradient>
+                            <Text style={styles.profileName}>Айсултан Ахметов</Text>
+                            <Text style={styles.profileEmail}>aisultan@school.kz</Text>
+                        </View>
+
+                        <View style={styles.profileStats}>
+                            <View style={styles.profileStat}>
+                                <Text style={styles.profileStatValue}>8</Text>
+                                <Text style={styles.profileStatLabel}>Шаныраков</Text>
+                            </View>
+                            <View style={styles.profileStat}>
+                                <Text style={styles.profileStatValue}>24</Text>
+                                <Text style={styles.profileStatLabel}>Мероприятий</Text>
+                            </View>
+                            <View style={styles.profileStat}>
+                                <Text style={styles.profileStatValue}>156</Text>
+                                <Text style={styles.profileStatLabel}>Баллов</Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.profileMenu}>
+                            <TouchableOpacity style={styles.menuItem}>
+                                <MaterialIcons name="person-outline" size={24} color="#666" />
+                                <Text style={styles.menuText}>Личные данные</Text>
+                                <MaterialIcons name="chevron-right" size={24} color="#999" />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.menuItem}>
+                                <MaterialIcons name="settings" size={24} color="#666" />
+                                <Text style={styles.menuText}>Настройки</Text>
+                                <MaterialIcons name="chevron-right" size={24} color="#999" />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.menuItem}>
+                                <MaterialIcons name="help-outline" size={24} color="#666" />
+                                <Text style={styles.menuText}>Помощь</Text>
+                                <MaterialIcons name="chevron-right" size={24} color="#999" />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.menuItem}>
+                                <MaterialIcons name="logout" size={24} color="#EF4444" />
+                                <Text style={[styles.menuText, { color: '#EF4444' }]}>Выйти</Text>
+                                <MaterialIcons name="chevron-right" size={24} color="#999" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Animated.View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -200,7 +279,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0F172A',
+        backgroundColor: '#FFFFFF',
     },
     header: {
         flexDirection: 'row',
@@ -209,15 +288,16 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingTop: 10,
         paddingBottom: 20,
+        backgroundColor: '#FFFFFF',
     },
     greeting: {
         fontSize: 14,
-        color: '#94A3B8',
+        color: '#666666',
         fontFamily: 'Inter_400Regular',
     },
     userName: {
         fontSize: 24,
-        color: 'white',
+        color: '#1F2937',
         fontFamily: 'Inter_700Bold',
         marginTop: 2,
     },
@@ -232,10 +312,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         shadowColor: PURPLE,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 8,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 4,
     },
     statsContainer: {
         paddingHorizontal: 20,
@@ -253,12 +333,12 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 20,
-        color: 'white',
+        color: '#1F2937',
         fontFamily: 'Inter_700Bold',
         marginBottom: 16,
     },
     viewAllText: {
-        color: LIGHT_BLUE,
+        color: BLUE,
         fontFamily: 'Inter_600SemiBold',
         fontSize: 14,
     },
@@ -269,33 +349,30 @@ const styles = StyleSheet.create({
     },
     statCard: {
         width: '48%',
+        backgroundColor: '#F9FAFB',
         borderRadius: 16,
         padding: 16,
         marginBottom: 12,
-        shadowColor: BLUE,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-        elevation: 4,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
     },
     statIconContainer: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 12,
     },
     statValue: {
         fontSize: 24,
-        color: 'white',
+        color: '#1F2937',
         fontFamily: 'Inter_800ExtraBold',
         marginBottom: 4,
     },
     statLabel: {
         fontSize: 12,
-        color: '#E2E8F0',
+        color: '#6B7280',
         fontFamily: 'Inter_400Regular',
         lineHeight: 16,
     },
@@ -306,41 +383,39 @@ const styles = StyleSheet.create({
     },
     actionCard: {
         width: '100%',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 16,
         marginBottom: 12,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        borderLeftWidth: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 2,
     },
-    actionGradient: {
-        borderRadius: 20,
+    actionContent: {
         padding: 20,
-        borderWidth: 2,
-        borderTopWidth: 0,
-        borderLeftWidth: 0,
-        borderRightWidth: 0,
-        borderBottomWidth: 4,
         position: 'relative',
-        shadowColor: PURPLE,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 12,
-        elevation: 6,
     },
     actionIconContainer: {
         width: 56,
         height: 56,
-        borderRadius: 28,
-        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+        borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 16,
     },
     actionTitle: {
         fontSize: 18,
-        color: 'white',
+        color: '#1F2937',
         fontFamily: 'Inter_700Bold',
         marginBottom: 8,
     },
     actionDescription: {
         fontSize: 14,
-        color: '#E2E8F0',
+        color: '#6B7280',
         fontFamily: 'Inter_400Regular',
         lineHeight: 20,
         marginBottom: 16,
@@ -352,14 +427,16 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        backgroundColor: '#F3F4F6',
         alignItems: 'center',
         justifyContent: 'center',
     },
     activitiesContainer: {
-        backgroundColor: '#1E293B',
+        backgroundColor: '#F9FAFB',
         borderRadius: 16,
         padding: 20,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
     },
     activityItem: {
         flexDirection: 'row',
@@ -367,11 +444,11 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     activityDot: {
-        width: 12,
-        height: 12,
-        borderRadius: 6,
-        backgroundColor: LIGHT_BLUE,
-        marginTop: 6,
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: BLUE,
+        marginTop: 8,
         marginRight: 12,
     },
     activityContent: {
@@ -379,13 +456,13 @@ const styles = StyleSheet.create({
     },
     activityTitle: {
         fontSize: 14,
-        color: 'white',
+        color: '#1F2937',
         fontFamily: 'Inter_500Medium',
         marginBottom: 4,
     },
     activityTime: {
         fontSize: 12,
-        color: '#94A3B8',
+        color: '#9CA3AF',
         fontFamily: 'Inter_400Regular',
     },
     ctaCard: {
@@ -415,7 +492,7 @@ const styles = StyleSheet.create({
     },
     ctaDescription: {
         fontSize: 14,
-        color: '#E2E8F0',
+        color: '#E5E7EB',
         fontFamily: 'Inter_400Regular',
         textAlign: 'center',
         lineHeight: 20,
@@ -436,18 +513,112 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 32,
         borderTopWidth: 1,
-        borderTopColor: '#334155',
+        borderTopColor: '#E5E7EB',
         marginTop: 8,
     },
     footerText: {
         fontSize: 14,
-        color: '#94A3B8',
+        color: '#6B7280',
         fontFamily: 'Inter_500Medium',
         marginBottom: 4,
     },
     footerSubtext: {
         fontSize: 12,
-        color: '#64748B',
+        color: '#9CA3AF',
         fontFamily: 'Inter_400Regular',
+    },
+    // Стили для модального окна профиля
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        paddingBottom: 40,
+        maxHeight: '85%',
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E5E7EB',
+    },
+    modalTitle: {
+        fontSize: 20,
+        color: '#1F2937',
+        fontFamily: 'Inter_700Bold',
+    },
+    closeButton: {
+        padding: 4,
+    },
+    profileInfo: {
+        alignItems: 'center',
+        padding: 32,
+    },
+    profileImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 16,
+        shadowColor: PURPLE,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 8,
+    },
+    profileName: {
+        fontSize: 24,
+        color: '#1F2937',
+        fontFamily: 'Inter_700Bold',
+        marginBottom: 4,
+    },
+    profileEmail: {
+        fontSize: 14,
+        color: '#6B7280',
+        fontFamily: 'Inter_400Regular',
+    },
+    profileStats: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        paddingHorizontal: 20,
+        marginBottom: 32,
+    },
+    profileStat: {
+        alignItems: 'center',
+    },
+    profileStatValue: {
+        fontSize: 20,
+        color: PURPLE,
+        fontFamily: 'Inter_800ExtraBold',
+        marginBottom: 4,
+    },
+    profileStatLabel: {
+        fontSize: 12,
+        color: '#6B7280',
+        fontFamily: 'Inter_400Regular',
+    },
+    profileMenu: {
+        paddingHorizontal: 20,
+    },
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F4F6',
+    },
+    menuText: {
+        flex: 1,
+        fontSize: 16,
+        color: '#374151',
+        fontFamily: 'Inter_500Medium',
+        marginLeft: 16,
     },
 });
