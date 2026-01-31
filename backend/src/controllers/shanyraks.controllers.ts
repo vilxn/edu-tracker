@@ -1,6 +1,6 @@
 
 import { Request, Response } from 'express';
-import { ShanyrakService } from '../services/shanyraks.service';
+import { ShanyrakService } from '../services/shanyrak.services';
 import { AppError } from '../utils/errors';
 
 const shanyrakService = new ShanyrakService();
