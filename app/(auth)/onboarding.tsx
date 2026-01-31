@@ -10,6 +10,7 @@ import {
     Alert
 } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
+import {Link, router} from "expo-router";
 
 export default function OnboardingScreen() {
     const [step, setStep] = useState(1);
@@ -370,9 +371,23 @@ export default function OnboardingScreen() {
                         (step === 4 && clubType === null)
                     }
                 >
-                    <Text style={styles.nextButtonText}>
-                        {step === 5 ? 'Завершить' : 'Далее'}
-                    </Text>
+
+                    {step === 5 ? (
+                      <TouchableOpacity
+                        style={styles.nextButton}
+                        onPress={() => router.replace('/(tabs)/')}
+                      >
+                          <Text style={styles.nextButtonText}>Завершить</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity
+                        style={styles.nextButton}
+                        onPress={handleNext}
+                      >
+                          <Text style={styles.nextButtonText}>Далее</Text>
+                      </TouchableOpacity>
+                    )}
+
                     {step < 5 && <Ionicons name="arrow-forward" size={20} color="#FFF" />}
                 </TouchableOpacity>
             </View>
