@@ -57,12 +57,12 @@ const ProjectsScreen = () => {
     const fadeAnim = useState(new Animated.Value(0))[0];
 
     const categories = [
-        { id: EventCategory.ALL, name: 'Все', icon: 'globe', color: '#6366F1' },
+        { id: EventCategory.ALL, name: 'Все', icon: 'magnify', color: '#6366F1' },
         { id: EventCategory.OLYMPIAD, name: 'Олимпиады', icon: 'trophy', color: '#F59E0B' },
         { id: EventCategory.PROJECT, name: 'Проекты', icon: 'lightbulb', color: '#10B981' },
-        { id: EventCategory.HACKATHON, name: 'Хакатоны', icon: 'code', color: '#8B5CF6' },
+        { id: EventCategory.HACKATHON, name: 'Хакатоны', icon: 'code-braces', color: '#8B5CF6' },
         { id: EventCategory.CONFERENCE, name: 'Конференции', icon: 'presentation', color: '#EC4899' },
-        { id: EventCategory.COMPETITION, name: 'Конкурсы', icon: 'award', color: '#3B82F6' },
+        { id: EventCategory.COMPETITION, name: 'Конкурсы', icon: 'trophy', color: '#3B82F6' },
     ];
 
     const events: Event[] = [

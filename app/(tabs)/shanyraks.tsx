@@ -15,6 +15,7 @@ import {
     StatusBar,
 } from 'react-native';
 import { MaterialIcons, FontAwesome5, AntDesign, Feather } from '@expo/vector-icons';
+import { Colors, Shadows, BorderRadius, Spacing, Typography } from '@/constants/theme'; // Импортируем цветовую схему
 
 // ========== TYPES ==========
 interface Shanyrak {
@@ -78,9 +79,8 @@ interface TabButtonProps {
     onPress: () => void;
 }
 
-// ========== COMPONENTS ==========
 const ShanyrakRanking: React.FC<ShanyrakRankingProps> = ({ shanyrak, position, onPress }) => {
-    const medalColors = ['#FFD700', '#C0C0C0', '#CD7F32', '#4A6572'];
+    const medalColors = [Colors.light.warning, '#C0C0C0', '#CD7F32', Colors.light.neutral[500]];
     const animation = useRef(new Animated.Value(0)).current;
 
     React.useEffect(() => {
@@ -97,7 +97,6 @@ const ShanyrakRanking: React.FC<ShanyrakRankingProps> = ({ shanyrak, position, o
         outputRange: [0.8, 1],
     });
 
-    // Функция для затемнения цвета
     const darkenColor = (color: string, percent: number) => {
         const num = parseInt(color.replace('#', ''), 16);
         const amt = Math.round(2.55 * percent);
@@ -115,8 +114,8 @@ const ShanyrakRanking: React.FC<ShanyrakRankingProps> = ({ shanyrak, position, o
             .slice(1)}`;
     };
 
-    const positionColor = darkenColor(shanyrak.color, -20); // Темнее на 20%
-    const pointsColor = '#5D9CEC';
+    const positionColor = darkenColor(shanyrak.color, -20);
+    const pointsColor = Colors.light.info;
 
     return (
         <Animated.View style={{ transform: [{ scale }] }}>
@@ -138,11 +137,11 @@ const ShanyrakRanking: React.FC<ShanyrakRankingProps> = ({ shanyrak, position, o
                     <Text style={styles.shanyrakName}>{shanyrak.name}</Text>
                     <View style={styles.rankingDetails}>
                         <View style={styles.detailItem}>
-                            <MaterialIcons name="emoji-events" size={14} color="#FFB74D" />
+                            <MaterialIcons name="emoji-events" size={14} color={Colors.light.warning} />
                             <Text style={styles.detailText}>{shanyrak.points.toLocaleString()} баллов</Text>
                         </View>
                         <View style={styles.detailItem}>
-                            <Feather name="users" size={14} color="#64B5F6" />
+                            <Feather name="users" size={14} color={Colors.light.info} />
                             <Text style={styles.detailText}>{shanyrak.members} участников</Text>
                         </View>
                     </View>
@@ -163,6 +162,13 @@ const HistoryItem: React.FC<HistoryItemProps> = ({ activity, shanyrakColor }) =>
         creative: 'palette',
     };
 
+    const categoryColors: Record<Activity['category'], string> = {
+        event: Colors.light.categories.conference,
+        sport: Colors.light.accent,
+        study: Colors.light.success,
+        creative: Colors.light.categories.hackathon,
+    };
+
     return (
         <View style={styles.historyItem}>
             <View style={[styles.historyIcon, { backgroundColor: `${shanyrakColor}20` }]}>
@@ -173,8 +179,10 @@ const HistoryItem: React.FC<HistoryItemProps> = ({ activity, shanyrakColor }) =>
                     <Text style={styles.historyTitle} numberOfLines={1}>
                         {activity.name}
                     </Text>
-                    <View style={styles.pointsBadge}>
-                        <Text style={styles.pointsBadgeText}>+{activity.points}</Text>
+                    <View style={[styles.pointsBadge, { backgroundColor: `${categoryColors[activity.category]}20` }]}>
+                        <Text style={[styles.pointsBadgeText, { color: categoryColors[activity.category] }]}>
+                            +{activity.points}
+                        </Text>
                     </View>
                 </View>
                 <Text style={styles.historyDescription} numberOfLines={2}>
@@ -193,8 +201,9 @@ const HistoryItem: React.FC<HistoryItemProps> = ({ activity, shanyrakColor }) =>
 };
 
 const AchievementBadge: React.FC<AchievementBadgeProps> = ({ achievement }) => {
-    const achievementColor = achievement.unlocked ? '#FFD700' : '#E0E0E0';
-    const borderColor = achievement.unlocked ? '#FFB74D' : '#BDBDBD';
+    const achievementColor = achievement.unlocked ? Colors.light.warning : Colors.light.neutral[300];
+    const borderColor = achievement.unlocked ? Colors.light.warning : Colors.light.neutral[400];
+    const progressColor = achievement.unlocked ? Colors.light.success : Colors.light.info;
 
     return (
         <View style={[styles.achievementCard, !achievement.unlocked && styles.achievementLocked]}>
@@ -213,8 +222,7 @@ const AchievementBadge: React.FC<AchievementBadgeProps> = ({ achievement }) => {
                             <View
                                 style={[
                                     styles.progressFill,
-                                    { width: `${achievement.progress}%` },
-                                    achievement.unlocked && styles.progressFillUnlocked,
+                                    { width: `${achievement.progress}%`, backgroundColor: progressColor },
                                 ]}
                             />
                         </View>
@@ -223,7 +231,7 @@ const AchievementBadge: React.FC<AchievementBadgeProps> = ({ achievement }) => {
                 )}
                 {achievement.unlocked && (
                     <View style={styles.rewardBadge}>
-                        <MaterialIcons name="star" size={12} color="#FFD700" />
+                        <MaterialIcons name="star" size={12} color={Colors.light.warning} />
                         <Text style={styles.rewardText}>+{achievement.rewardPoints} баллов</Text>
                     </View>
                 )}
@@ -231,20 +239,34 @@ const AchievementBadge: React.FC<AchievementBadgeProps> = ({ achievement }) => {
             <MaterialIcons
                 name={achievement.unlocked ? 'check-circle' : 'lock'}
                 size={24}
-                color={achievement.unlocked ? '#4CAF50' : '#9E9E9E'}
+                color={achievement.unlocked ? Colors.light.success : Colors.light.neutral[500]}
             />
         </View>
     );
 };
 
 const TabButton: React.FC<TabButtonProps> = ({ tab, isActive, onPress }) => (
-    <TouchableOpacity style={[styles.tabButton, isActive && styles.tabButtonActive]} onPress={onPress}>
+    <TouchableOpacity
+        style={[
+            styles.tabButton,
+            isActive && [
+                styles.tabButtonActive,
+                { backgroundColor: Colors.light.primary + '30' }
+            ]
+        ]}
+        onPress={onPress}
+    >
         <MaterialIcons
             name={tab.icon}
             size={24}
-            color={isActive ? '#FFFFFF' : 'rgba(255,255,255,0.7)'}
+            color={isActive ? Colors.light.primary : Colors.light.neutral[400]}
         />
-        <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>{tab.label}</Text>
+        <Text style={[
+            styles.tabLabel,
+            isActive ? { color: Colors.light.primary, fontWeight: '600' } : { color: Colors.light.neutral[500] }
+        ]}>
+            {tab.label}
+        </Text>
     </TouchableOpacity>
 );
 
@@ -288,20 +310,40 @@ const ActivityReportForm: React.FC<{
     };
 
     const categories = [
-        { value: 'event' as const, label: 'Мероприятие', icon: 'celebration' as keyof typeof MaterialIcons.glyphMap, color: '#FF7043' },
-        { value: 'sport' as const, label: 'Спорт', icon: 'sports' as keyof typeof MaterialIcons.glyphMap, color: '#42A5F5' },
-        { value: 'study' as const, label: 'Учеба', icon: 'school' as keyof typeof MaterialIcons.glyphMap, color: '#66BB6A' },
-        { value: 'creative' as const, label: 'Творчество', icon: 'palette' as keyof typeof MaterialIcons.glyphMap, color: '#AB47BC' },
+        {
+            value: 'event' as const,
+            label: 'Мероприятие',
+            icon: 'celebration' as keyof typeof MaterialIcons.glyphMap,
+            color: Colors.light.categories.conference
+        },
+        {
+            value: 'sport' as const,
+            label: 'Спорт',
+            icon: 'sports' as keyof typeof MaterialIcons.glyphMap,
+            color: Colors.light.accent
+        },
+        {
+            value: 'study' as const,
+            label: 'Учеба',
+            icon: 'school' as keyof typeof MaterialIcons.glyphMap,
+            color: Colors.light.success
+        },
+        {
+            value: 'creative' as const,
+            label: 'Творчество',
+            icon: 'palette' as keyof typeof MaterialIcons.glyphMap,
+            color: Colors.light.categories.hackathon
+        },
     ];
 
     return (
         <Modal visible={visible} animationType="slide" transparent>
-            <SafeAreaView style={styles.modalContainer}>
+            <SafeAreaView style={[styles.modalContainer, { backgroundColor: 'rgba(0,0,0,0.6)' }]}>
                 <View style={styles.modalContent}>
                     <View style={styles.modalHeader}>
                         <Text style={styles.modalTitle}>Новый отчет</Text>
                         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                            <AntDesign name="close" size={24} color="#333" />
+                            <AntDesign name="close" size={24} color={Colors.light.neutral[800]} />
                         </TouchableOpacity>
                     </View>
 
@@ -314,13 +356,21 @@ const ActivityReportForm: React.FC<{
                                         key={shanyrak.id}
                                         style={[
                                             styles.shanyrakOption,
-                                            formData.shanyrakId === shanyrak.id && styles.shanyrakOptionActive,
-                                            { borderColor: shanyrak.color },
+                                            formData.shanyrakId === shanyrak.id && [
+                                                styles.shanyrakOptionActive,
+                                                { borderColor: shanyrak.color, backgroundColor: `${shanyrak.color}20` }
+                                            ],
+                                            { borderColor: Colors.light.neutral[300] },
                                         ]}
                                         onPress={() => setFormData({ ...formData, shanyrakId: shanyrak.id })}
                                     >
                                         <View style={[styles.shanyrakDot, { backgroundColor: shanyrak.color }]} />
-                                        <Text style={styles.shanyrakOptionText}>{shanyrak.name}</Text>
+                                        <Text style={[
+                                            styles.shanyrakOptionText,
+                                            formData.shanyrakId === shanyrak.id && { color: shanyrak.color }
+                                        ]}>
+                                            {shanyrak.name}
+                                        </Text>
                                     </TouchableOpacity>
                                 ))}
                             </ScrollView>
@@ -333,7 +383,7 @@ const ActivityReportForm: React.FC<{
                                 value={formData.name}
                                 onChangeText={(text) => setFormData({ ...formData, name: text })}
                                 placeholder="Субботник в парке"
-                                placeholderTextColor="#9E9E9E"
+                                placeholderTextColor={Colors.light.neutral[400]}
                             />
                         </View>
 
@@ -345,19 +395,22 @@ const ActivityReportForm: React.FC<{
                                         key={cat.value}
                                         style={[
                                             styles.categoryCard,
-                                            formData.category === cat.value && { backgroundColor: `${cat.color}20`, borderColor: cat.color },
+                                            formData.category === cat.value && {
+                                                backgroundColor: `${cat.color}20`,
+                                                borderColor: cat.color
+                                            },
                                         ]}
                                         onPress={() => setFormData({ ...formData, category: cat.value })}
                                     >
                                         <MaterialIcons
                                             name={cat.icon}
                                             size={24}
-                                            color={formData.category === cat.value ? cat.color : '#757575'}
+                                            color={formData.category === cat.value ? cat.color : Colors.light.neutral[500]}
                                         />
                                         <Text
                                             style={[
                                                 styles.categoryLabel,
-                                                formData.category === cat.value && { color: cat.color },
+                                                formData.category === cat.value ? { color: cat.color } : { color: Colors.light.neutral[500] }
                                             ]}
                                         >
                                             {cat.label}
@@ -374,7 +427,7 @@ const ActivityReportForm: React.FC<{
                                 value={formData.description}
                                 onChangeText={(text) => setFormData({ ...formData, description: text })}
                                 placeholder="Опишите проведенную активность..."
-                                placeholderTextColor="#9E9E9E"
+                                placeholderTextColor={Colors.light.neutral[400]}
                                 multiline
                                 numberOfLines={4}
                                 textAlignVertical="top"
@@ -393,7 +446,7 @@ const ActivityReportForm: React.FC<{
                                         })
                                     }
                                 >
-                                    <MaterialIcons name="remove" size={24} color="#5D9CEC" />
+                                    <MaterialIcons name="remove" size={24} color={Colors.light.info} />
                                 </TouchableOpacity>
                                 <TextInput
                                     style={[styles.textInput, styles.participantInput]}
@@ -409,7 +462,7 @@ const ActivityReportForm: React.FC<{
                                         setFormData({ ...formData, participants: formData.participants + 1 })
                                     }
                                 >
-                                    <MaterialIcons name="add" size={24} color="#5D9CEC" />
+                                    <MaterialIcons name="add" size={24} color={Colors.light.info} />
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -426,7 +479,7 @@ const ActivityReportForm: React.FC<{
                             </View>
                             <View style={[styles.previewRow, styles.previewTotal]}>
                                 <Text style={styles.previewTotalLabel}>Итого:</Text>
-                                <Text style={styles.previewTotalValue}>
+                                <Text style={[styles.previewTotalValue, { color: Colors.light.success }]}>
                                     {Math.min(100, Math.max(10, formData.participants * 5 + 10))} баллов
                                 </Text>
                             </View>
@@ -434,11 +487,16 @@ const ActivityReportForm: React.FC<{
                     </ScrollView>
 
                     <View style={styles.modalFooter}>
-                        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-                            <Text style={styles.cancelButtonText}>Отмена</Text>
+                        <TouchableOpacity
+                            style={[styles.cancelButton, { borderColor: Colors.light.neutral[300] }]}
+                            onPress={onClose}
+                        >
+                            <Text style={[styles.cancelButtonText, { color: Colors.light.neutral[600] }]}>
+                                Отмена
+                            </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={[styles.submitButton, { backgroundColor: '#5D9CEC' }]}
+                            style={[styles.submitButton, { backgroundColor: Colors.light.info }]}
                             onPress={handleSubmit}
                         >
                             <Text style={styles.submitButtonText}>Отправить отчет</Text>
@@ -453,11 +511,41 @@ const ActivityReportForm: React.FC<{
 // ========== MAIN COMPONENT ==========
 export default function Shanyraks() {
     const [shanyraks, setShanyraks] = useState<Shanyrak[]>([
-        { id: '1', name: 'Алтын Орда', points: 1245, members: 28, color: '#FF7043' },
-        { id: '2', name: 'Жеті Жарғы', points: 1180, members: 25, color: '#42A5F5' },
-        { id: '3', name: 'Сарыарка', points: 1120, members: 30, color: '#66BB6A' },
-        { id: '4', name: 'Тулпар', points: 980, members: 22, color: '#AB47BC' },
-        { id: '5', name: 'Көкше', points: 875, members: 26, color: '#FFCA28' },
+        {
+            id: '1',
+            name: 'Алтын Орда',
+            points: 1245,
+            members: 28,
+            color: Colors.light.categories.conference
+        },
+        {
+            id: '2',
+            name: 'Жеті Жарғы',
+            points: 1180,
+            members: 25,
+            color: Colors.light.info
+        },
+        {
+            id: '3',
+            name: 'Сарыарка',
+            points: 1120,
+            members: 30,
+            color: Colors.light.success
+        },
+        {
+            id: '4',
+            name: 'Тулпар',
+            points: 980,
+            members: 22,
+            color: Colors.light.categories.hackathon
+        },
+        {
+            id: '5',
+            name: 'Көкше',
+            points: 875,
+            members: 26,
+            color: Colors.light.warning
+        },
     ]);
 
     const [activities, setActivities] = useState<Activity[]>([
@@ -572,18 +660,18 @@ export default function Shanyraks() {
     }, [shanyraks]);
 
     const renderHeader = () => (
-        <View style={[styles.header, { backgroundColor: '#2C3E50' }]}>
+        <View style={[styles.header, { backgroundColor: Colors.light.neutral[800] }]}>
             <View style={styles.headerContent}>
                 <View>
                     <Text style={styles.headerTitle}>Рейтинг Шаныраков</Text>
                     <Text style={styles.headerSubtitle}>Соревнование в реальном времени</Text>
                 </View>
-                <View style={styles.headerStats}>
+                <View style={[styles.headerStats, { backgroundColor: Colors.light.neutral[700] + '40' }]}>
                     <View style={styles.statItem}>
                         <Text style={styles.statValue}>{shanyraks.length}</Text>
                         <Text style={styles.statLabel}>Шаныраков</Text>
                     </View>
-                    <View style={styles.statDivider} />
+                    <View style={[styles.statDivider, { backgroundColor: Colors.light.neutral[600] + '40' }]} />
                     <View style={styles.statItem}>
                         <Text style={styles.statValue}>
                             {shanyraks.reduce((sum, s) => sum + s.points, 0).toLocaleString()}
@@ -592,7 +680,12 @@ export default function Shanyraks() {
                     </View>
                 </View>
             </View>
-            <MaterialIcons name="leaderboard" size={48} color="rgba(255,255,255,0.2)" style={styles.headerIcon} />
+            <MaterialIcons
+                name="leaderboard"
+                size={48}
+                color={Colors.light.neutral[600]}
+                style={styles.headerIcon}
+            />
         </View>
     );
 
@@ -604,11 +697,17 @@ export default function Shanyraks() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor="#2C3E50" />
+            <StatusBar barStyle="light-content" backgroundColor={Colors.light.neutral[800]} />
 
             {renderHeader()}
 
-            <View style={styles.tabBar}>
+            <View style={[
+                styles.tabBar,
+                {
+                    backgroundColor: Colors.light.neutral[800],
+                    ...Shadows.md
+                }
+            ]}>
                 {tabs.map((tab) => (
                     <TabButton
                         key={tab.key}
@@ -644,12 +743,12 @@ export default function Shanyraks() {
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => {
                             const shanyrak = shanyraks.find((s) => s.id === item.shanyrakId);
-                            return <HistoryItem activity={item} shanyrakColor={shanyrak?.color || '#4A6572'} />;
+                            return <HistoryItem activity={item} shanyrakColor={shanyrak?.color || Colors.light.neutral[500]} />;
                         }}
                         contentContainerStyle={styles.listContent}
                         ListEmptyComponent={
                             <View style={styles.emptyState}>
-                                <MaterialIcons name="history" size={64} color="#E0E0E0" />
+                                <MaterialIcons name="history" size={64} color={Colors.light.neutral[300]} />
                                 <Text style={styles.emptyStateTitle}>История пуста</Text>
                                 <Text style={styles.emptyStateText}>
                                     Добавьте первый отчет об активности
@@ -672,7 +771,7 @@ export default function Shanyraks() {
             </View>
 
             <TouchableOpacity
-                style={[styles.fab, { backgroundColor: '#5D9CEC' }]}
+                style={[styles.fab, { backgroundColor: Colors.light.info }]}
                 onPress={() => setReportModalVisible(true)}
                 activeOpacity={0.8}
             >
@@ -694,14 +793,14 @@ const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F8F9FA',
+        backgroundColor: Colors.light.background,
     },
     header: {
-        paddingHorizontal: 24,
-        paddingTop: 16,
-        paddingBottom: 24,
-        borderBottomLeftRadius: 24,
-        borderBottomRightRadius: 24,
+        paddingHorizontal: Spacing.xl,
+        paddingTop: Spacing.lg,
+        paddingBottom: Spacing.xl,
+        borderBottomLeftRadius: BorderRadius.xxl,
+        borderBottomRightRadius: BorderRadius.xxl,
     },
     headerContent: {
         flexDirection: 'row',
@@ -709,146 +808,121 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     headerTitle: {
-        fontSize: 28,
-        fontWeight: '800',
-        color: 'white',
-        marginBottom: 4,
+        ...Typography.headline,
+        color: Colors.light.neutral[100],
+        marginBottom: Spacing.xs,
     },
     headerSubtitle: {
-        fontSize: 14,
-        color: 'rgba(255,255,255,0.8)',
+        ...Typography.caption,
+        color: Colors.light.neutral[300],
         fontWeight: '500',
     },
     headerStats: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(255,255,255,0.1)',
-        borderRadius: 12,
-        padding: 12,
+        borderRadius: BorderRadius.md,
+        padding: Spacing.md,
     },
     statItem: {
         alignItems: 'center',
-        paddingHorizontal: 8,
+        paddingHorizontal: Spacing.sm,
     },
     statValue: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: 'white',
+        ...Typography.subtitle,
+        color: Colors.light.neutral[100],
         marginBottom: 2,
     },
     statLabel: {
         fontSize: 10,
-        color: 'rgba(255,255,255,0.7)',
+        color: Colors.light.neutral[300],
         fontWeight: '500',
     },
     statDivider: {
         width: 1,
         height: 24,
-        backgroundColor: 'rgba(255,255,255,0.2)',
-        marginHorizontal: 8,
+        marginHorizontal: Spacing.sm,
     },
     headerIcon: {
         position: 'absolute',
-        right: 24,
-        bottom: 16,
+        right: Spacing.xl,
+        bottom: Spacing.lg,
+        zIndex: -100
     },
     tabBar: {
         flexDirection: 'row',
-        backgroundColor: '#2C3E50',
-        marginHorizontal: 16,
+        marginHorizontal: Spacing.lg,
         marginTop: -16,
-        borderRadius: 16,
+        borderRadius: BorderRadius.lg,
         padding: 4,
-        elevation: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
     },
     tabButton: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 12,
-        borderRadius: 12,
+        paddingVertical: Spacing.md,
+        borderRadius: BorderRadius.md,
     },
-    tabButtonActive: {
-        backgroundColor: 'rgba(255,255,255,0.15)',
-    },
+    tabButtonActive: {},
     tabLabel: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: 'rgba(255,255,255,0.7)',
-        marginLeft: 8,
+        ...Typography.small,
+        marginLeft: Spacing.xs,
     },
-    tabLabelActive: {
-        color: '#FFFFFF',
-    },
+    tabLabelActive: {},
     content: {
         flex: 1,
-        paddingTop: 16,
+        paddingTop: Spacing.lg,
     },
     listContent: {
-        paddingHorizontal: 16,
+        paddingHorizontal: Spacing.lg,
         paddingBottom: 100,
     },
     rankingCard: {
         flexDirection: 'row',
-        backgroundColor: 'white',
-        borderRadius: 20,
-        padding: 20,
-        marginBottom: 12,
+        backgroundColor: Colors.light.cardBackground,
+        borderRadius: BorderRadius.xl,
+        padding: Spacing.lg,
+        marginBottom: Spacing.md,
         alignItems: 'center',
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
+        borderWidth: 1,
+        borderColor: Colors.light.cardBorder,
+        ...Shadows.md,
     },
     positionBadge: {
         width: 56,
         height: 56,
-        borderRadius: 28,
+        borderRadius: BorderRadius.full,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 16,
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
+        marginRight: Spacing.lg,
+        ...Shadows.sm,
         position: 'relative',
     },
     positionText: {
         color: 'white',
-        fontSize: 24,
-        fontWeight: '800',
+        ...Typography.title,
     },
     medalContainer: {
         position: 'absolute',
         bottom: -4,
         right: -4,
-        backgroundColor: 'white',
-        borderRadius: 8,
+        backgroundColor: Colors.light.cardBackground,
+        borderRadius: BorderRadius.sm,
         padding: 2,
     },
-    medalIcon: {
-        // Стили иконки медали
-    },
+    medalIcon: {},
     rankingContent: {
         flex: 1,
     },
     shanyrakName: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#333',
-        marginBottom: 8,
+        ...Typography.title,
+        color: Colors.light.neutral[800],
+        marginBottom: Spacing.sm,
     },
     rankingDetails: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 12,
+        gap: Spacing.md,
     },
     detailItem: {
         flexDirection: 'row',
@@ -856,46 +930,40 @@ const styles = StyleSheet.create({
     },
     detailText: {
         marginLeft: 6,
-        color: '#666',
+        color: Colors.light.neutral[600],
         fontSize: 13,
         fontWeight: '500',
     },
     pointsCircle: {
         width: 64,
         height: 64,
-        borderRadius: 32,
+        borderRadius: BorderRadius.full,
         justifyContent: 'center',
         alignItems: 'center',
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
+        ...Shadows.sm,
     },
     pointsText: {
         color: 'white',
-        fontSize: 18,
+        ...Typography.subtitle,
         fontWeight: '800',
     },
     historyItem: {
         flexDirection: 'row',
-        backgroundColor: 'white',
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 12,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
+        backgroundColor: Colors.light.cardBackground,
+        borderRadius: BorderRadius.lg,
+        padding: Spacing.lg,
+        marginBottom: Spacing.md,
+        borderWidth: 1,
+        borderColor: Colors.light.cardBorder,
+        ...Shadows.sm,
     },
     historyIcon: {
         width: 48,
         height: 48,
-        borderRadius: 24,
+        borderRadius: BorderRadius.full,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 16,
+        marginRight: Spacing.lg,
     },
     historyContent: {
         flex: 1,
@@ -904,53 +972,47 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        marginBottom: 8,
+        marginBottom: Spacing.sm,
     },
     historyTitle: {
-        fontSize: 16,
+        ...Typography.body,
         fontWeight: '700',
-        color: '#333',
+        color: Colors.light.neutral[800],
         flex: 1,
-        marginRight: 12,
+        marginRight: Spacing.md,
     },
     pointsBadge: {
-        backgroundColor: '#4CAF5020',
-        paddingHorizontal: 10,
+        paddingHorizontal: Spacing.sm,
         paddingVertical: 4,
-        borderRadius: 12,
+        borderRadius: BorderRadius.md,
         minWidth: 50,
         alignItems: 'center',
     },
     pointsBadgeText: {
-        color: '#4CAF50',
-        fontSize: 14,
+        ...Typography.small,
         fontWeight: '800',
     },
     historyDescription: {
-        fontSize: 14,
-        color: '#666',
+        ...Typography.caption,
+        color: Colors.light.neutral[600],
         lineHeight: 20,
-        marginBottom: 8,
+        marginBottom: Spacing.sm,
     },
     historyDate: {
         fontSize: 12,
-        color: '#999',
+        color: Colors.light.neutral[500],
         fontWeight: '500',
     },
     achievementCard: {
         flex: 1,
-        backgroundColor: 'white',
-        borderRadius: 16,
-        padding: 16,
-        margin: 6,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        minHeight: 180,
+        backgroundColor: Colors.light.cardBackground,
+        borderRadius: BorderRadius.lg,
+        padding: Spacing.lg,
+        margin: Spacing.xs,
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: Colors.light.cardBorder,
+        minHeight: 180,
+        ...Shadows.sm,
     },
     achievementLocked: {
         opacity: 0.7,
@@ -958,31 +1020,27 @@ const styles = StyleSheet.create({
     achievementIcon: {
         width: 56,
         height: 56,
-        borderRadius: 28,
+        borderRadius: BorderRadius.full,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 12,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        marginBottom: Spacing.md,
+        ...Shadows.sm,
         borderWidth: 2,
     },
     achievementContent: {
         flex: 1,
     },
     achievementTitle: {
-        fontSize: 16,
+        ...Typography.body,
         fontWeight: '700',
-        color: '#333',
-        marginBottom: 6,
+        color: Colors.light.neutral[800],
+        marginBottom: Spacing.xs,
     },
     achievementDescription: {
-        fontSize: 12,
-        color: '#666',
+        ...Typography.small,
+        color: Colors.light.neutral[600],
         lineHeight: 16,
-        marginBottom: 12,
+        marginBottom: Spacing.md,
         flex: 1,
     },
     progressContainer: {
@@ -990,38 +1048,34 @@ const styles = StyleSheet.create({
     },
     progressBar: {
         height: 6,
-        backgroundColor: '#E0E0E0',
-        borderRadius: 3,
+        backgroundColor: Colors.light.neutral[200],
+        borderRadius: BorderRadius.sm,
         overflow: 'hidden',
-        marginBottom: 6,
+        marginBottom: Spacing.xs,
     },
     progressFill: {
         height: '100%',
-        backgroundColor: '#5D9CEC',
-        borderRadius: 3,
-    },
-    progressFillUnlocked: {
-        backgroundColor: '#4CAF50',
+        borderRadius: BorderRadius.sm,
     },
     progressText: {
         fontSize: 10,
-        color: '#999',
+        color: Colors.light.neutral[500],
         fontWeight: '600',
         textAlign: 'right',
     },
     rewardBadge: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#FFF8E1',
-        paddingHorizontal: 10,
+        backgroundColor: `${Colors.light.warning}20`,
+        paddingHorizontal: Spacing.sm,
         paddingVertical: 6,
-        borderRadius: 12,
+        borderRadius: BorderRadius.md,
         alignSelf: 'flex-start',
-        marginTop: 8,
+        marginTop: Spacing.sm,
     },
     rewardText: {
         fontSize: 11,
-        color: '#FF8F00',
+        color: Colors.light.warning,
         fontWeight: '700',
         marginLeft: 4,
     },
@@ -1031,79 +1085,68 @@ const styles = StyleSheet.create({
     emptyState: {
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 60,
+        paddingVertical: Spacing.xl * 2,
     },
     emptyStateTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#757575',
-        marginTop: 16,
-        marginBottom: 8,
+        ...Typography.subtitle,
+        color: Colors.light.neutral[500],
+        marginTop: Spacing.lg,
+        marginBottom: Spacing.sm,
     },
     emptyStateText: {
-        fontSize: 14,
-        color: '#BDBDBD',
+        ...Typography.caption,
+        color: Colors.light.neutral[400],
         textAlign: 'center',
-        paddingHorizontal: 32,
+        paddingHorizontal: Spacing.xl,
     },
     fab: {
         position: 'absolute',
-        right: 24,
-        bottom: 24,
+        right: Spacing.lg,
+        bottom: Spacing.lg,
         width: 64,
         height: 64,
-        borderRadius: 32,
+        borderRadius: BorderRadius.full,
         justifyContent: 'center',
         alignItems: 'center',
-        elevation: 12,
-        shadowColor: '#5D9CEC',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.3,
-        shadowRadius: 16,
+        ...Shadows.lg,
     },
     modalContainer: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'flex-end',
     },
     modalContent: {
-        backgroundColor: 'white',
-        borderTopLeftRadius: 32,
-        borderTopRightRadius: 32,
+        backgroundColor: Colors.light.cardBackground,
+        borderTopLeftRadius: BorderRadius.xxl,
+        borderTopRightRadius: BorderRadius.xxl,
         maxHeight: '90%',
-        elevation: 24,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 32,
+        ...Shadows.xl,
     },
     modalHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 24,
+        padding: Spacing.lg,
         borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
+        borderBottomColor: Colors.light.neutral[200],
     },
     modalTitle: {
-        fontSize: 24,
-        fontWeight: '700',
-        color: '#333',
+        ...Typography.title,
+        color: Colors.light.neutral[800],
     },
     closeButton: {
         padding: 4,
     },
     modalBody: {
-        paddingHorizontal: 24,
+        paddingHorizontal: Spacing.lg,
     },
     inputGroup: {
-        marginBottom: 24,
+        marginBottom: Spacing.lg,
     },
     inputLabel: {
-        fontSize: 16,
+        ...Typography.body,
         fontWeight: '600',
-        color: '#333',
-        marginBottom: 12,
+        color: Colors.light.neutral[800],
+        marginBottom: Spacing.md,
     },
     shanyrakPicker: {
         flexDirection: 'row',
@@ -1111,35 +1154,33 @@ const styles = StyleSheet.create({
     shanyrakOption: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        borderRadius: 20,
+        paddingHorizontal: Spacing.md,
+        paddingVertical: Spacing.sm,
+        borderRadius: BorderRadius.full,
         borderWidth: 2,
-        backgroundColor: 'white',
-        marginRight: 8,
+        backgroundColor: Colors.light.cardBackground,
+        marginRight: Spacing.sm,
     },
-    shanyrakOptionActive: {
-        backgroundColor: '#F0F8FF',
-    },
+    shanyrakOptionActive: {},
     shanyrakDot: {
         width: 12,
         height: 12,
-        borderRadius: 6,
-        marginRight: 8,
+        borderRadius: BorderRadius.full,
+        marginRight: Spacing.sm,
     },
     shanyrakOptionText: {
-        fontSize: 14,
+        ...Typography.small,
         fontWeight: '600',
-        color: '#333',
+        color: Colors.light.neutral[800],
     },
     textInput: {
         borderWidth: 2,
-        borderColor: '#E0E0E0',
-        borderRadius: 16,
-        padding: 16,
-        fontSize: 16,
-        color: '#333',
-        backgroundColor: 'white',
+        borderColor: Colors.light.neutral[300],
+        borderRadius: BorderRadius.lg,
+        padding: Spacing.md,
+        ...Typography.body,
+        color: Colors.light.neutral[800],
+        backgroundColor: Colors.light.cardBackground,
     },
     multilineInput: {
         minHeight: 120,
@@ -1148,23 +1189,22 @@ const styles = StyleSheet.create({
     categoryGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 12,
+        gap: Spacing.md,
     },
     categoryCard: {
         flex: 1,
         minWidth: (width - 72) / 2,
         alignItems: 'center',
-        padding: 16,
-        borderRadius: 16,
+        padding: Spacing.lg,
+        borderRadius: BorderRadius.lg,
         borderWidth: 2,
-        borderColor: '#E0E0E0',
-        backgroundColor: 'white',
+        borderColor: Colors.light.neutral[300],
+        backgroundColor: Colors.light.cardBackground,
     },
     categoryLabel: {
-        fontSize: 14,
+        ...Typography.small,
         fontWeight: '600',
-        color: '#757575',
-        marginTop: 8,
+        marginTop: Spacing.sm,
     },
     participantsContainer: {
         flexDirection: 'row',
@@ -1173,92 +1213,89 @@ const styles = StyleSheet.create({
     participantButton: {
         width: 48,
         height: 48,
-        borderRadius: 24,
+        borderRadius: BorderRadius.full,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#F0F8FF',
+        backgroundColor: `${Colors.light.info}10`,
         borderWidth: 2,
-        borderColor: '#E0E0E0',
+        borderColor: Colors.light.neutral[300],
     },
     participantInput: {
         flex: 1,
-        marginHorizontal: 12,
+        marginHorizontal: Spacing.md,
         textAlign: 'center',
     },
     previewCard: {
-        backgroundColor: '#F8F9FA',
-        borderRadius: 16,
-        padding: 20,
-        marginBottom: 24,
+        backgroundColor: Colors.light.neutral[50],
+        borderRadius: BorderRadius.lg,
+        padding: Spacing.lg,
+        marginBottom: Spacing.lg,
         borderWidth: 2,
-        borderColor: '#E0E0E0',
+        borderColor: Colors.light.neutral[200],
     },
     previewTitle: {
-        fontSize: 18,
+        ...Typography.subtitle,
         fontWeight: '700',
-        color: '#333',
-        marginBottom: 16,
+        color: Colors.light.neutral[800],
+        marginBottom: Spacing.lg,
     },
     previewRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 12,
+        marginBottom: Spacing.md,
     },
     previewLabel: {
-        fontSize: 14,
-        color: '#666',
+        ...Typography.caption,
+        color: Colors.light.neutral[600],
     },
     previewValue: {
-        fontSize: 14,
+        ...Typography.caption,
         fontWeight: '600',
-        color: '#333',
+        color: Colors.light.neutral[800],
     },
     previewTotal: {
-        paddingTop: 12,
+        paddingTop: Spacing.md,
         borderTopWidth: 2,
-        borderTopColor: '#E0E0E0',
+        borderTopColor: Colors.light.neutral[200],
         marginTop: 4,
     },
     previewTotalLabel: {
-        fontSize: 16,
+        ...Typography.body,
         fontWeight: '700',
-        color: '#333',
+        color: Colors.light.neutral[800],
     },
     previewTotalValue: {
-        fontSize: 18,
+        ...Typography.subtitle,
         fontWeight: '800',
-        color: '#4CAF50',
     },
     modalFooter: {
         flexDirection: 'row',
-        padding: 24,
+        padding: Spacing.lg,
         borderTopWidth: 1,
-        borderTopColor: '#F0F0F0',
-        gap: 12,
+        borderTopColor: Colors.light.neutral[200],
+        gap: Spacing.md,
     },
     cancelButton: {
         flex: 1,
-        padding: 18,
-        borderRadius: 16,
+        padding: Spacing.lg,
+        borderRadius: BorderRadius.lg,
         borderWidth: 2,
-        borderColor: '#E0E0E0',
         alignItems: 'center',
-        backgroundColor: 'white',
+        backgroundColor: Colors.light.cardBackground,
     },
     cancelButtonText: {
-        fontSize: 16,
+        ...Typography.body,
         fontWeight: '600',
-        color: '#666',
     },
     submitButton: {
         flex: 2,
-        padding: 18,
-        borderRadius: 16,
+        padding: Spacing.lg,
+        borderRadius: BorderRadius.lg,
         alignItems: 'center',
     },
     submitButtonText: {
-        fontSize: 16,
+        ...Typography.body,
         fontWeight: '700',
         color: 'white',
     },
