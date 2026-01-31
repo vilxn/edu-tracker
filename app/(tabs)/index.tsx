@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { AppRoute } from '@/constants/navigation';
 
 // Цвета в темно-синей и фиолетовой палитре
