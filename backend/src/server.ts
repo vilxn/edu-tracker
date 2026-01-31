@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from 'dotenv';
+import userRoutes from "./routes/user.routes";
 
 dotenv.config();
 
@@ -9,13 +10,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.post("/echo", (req, res) => {
-    const message = req.body.message || "No message provided";
-    console.log("Echo received:", message);
+app.use("/users", userRoutes);
+
+app.get("/", (req, res) => {
     res.json({
-        echo: message,
-        timestamp: new Date().toISOString(),
-        success: true
+        message: "API работает!",
+        endpoints: [
+            "POST /echo - эхо endpoint",
+            "GET /users - все пользователи",
+            "POST /users - создать пользователя",
+            "GET /users/:id - получить пользователя",
+            "DELETE /users/:id - удалить пользователя",
+            "GET /users/test/get-test - тест",
+            "POST /users/test/create-sample - тест создания"
+        ]
     });
 });
 

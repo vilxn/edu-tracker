@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 
-const ECHO_API_URL = "http://localhost:3000/echo"
+const ECHO_API_URL = "http://localhost:3000/users/"
 
 export default function DebuggingScreen() {
     const [message, setMessage] = useState('Hello from React Native');
@@ -32,16 +32,7 @@ export default function DebuggingScreen() {
             console.log('📤 Отправка echo запроса на:', ECHO_API_URL);
             console.log('Сообщение:', message);
 
-            const result = await axios.post(ECHO_API_URL, {
-                message: message,
-                timestamp: new Date().toISOString(),
-                platform: Platform.OS,
-            }, {
-                timeout: 10000,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+            const result = await axios.get(ECHO_API_URL);
 
             console.log('✅ Ответ сервера:', result.data);
 

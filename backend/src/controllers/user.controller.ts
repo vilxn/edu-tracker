@@ -21,8 +21,9 @@ export const createUser = async (req: Request, res: Response) => {
 };
 
 export const getUsers = async (_req: Request, res: Response) => {
-    const users = await prisma.user.findMany();
-    res.json(users);
+    res.json({
+        message: "Hello World!"
+    })
 };
 
 export const getUserById = async (req: Request, res: Response) => {
@@ -48,13 +49,3 @@ export const deleteUser = async (req: Request, res: Response) => {
 
     res.json({ message: "User deleted" });
 };
-
-export const testAPI = async (req: Request, res: Response) => {
-    const message = String(req.params.message);
-    console.log(message);
-    res.json({ message: "Test API" });
-}
-
-export const getTest = async (req: Request, res: Response) => {
-
-}
