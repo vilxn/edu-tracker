@@ -299,7 +299,6 @@ export default function OnboardingScreen() {
                                     ]}
                                     onPress={() => toggleAvailability(item.id)}
                                 >
-                                    <Text style={styles.availabilityIcon}>{item.icon}</Text>
                                     <Text style={styles.availabilityDay}>{item.day}</Text>
                                     {availability.includes(item.id) && (
                                         <View style={styles.availabilityCheck}>
@@ -354,42 +353,26 @@ export default function OnboardingScreen() {
                     </TouchableOpacity>
                 )}
 
-                <TouchableOpacity
-                    style={[
-                        styles.nextButton,
-                        (step === 1 && interests.length === 0) ||
-                        (step === 2 && !grade.trim()) ||
-                        (step === 3 && leadership === null) ||
-                        (step === 4 && clubType === null)
-                            ? styles.nextButtonDisabled : null
-                    ]}
+
+
+                {step === 5 ? (
+                  <TouchableOpacity
+                    style={styles.nextButton}
+                    onPress={() => router.replace('/(tabs)/')}
+                  >
+                      <Text style={styles.nextButtonText}>Завершить</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.nextButton}
                     onPress={handleNext}
-                    disabled={
-                        (step === 1 && interests.length === 0) ||
-                        (step === 2 && !grade.trim()) ||
-                        (step === 3 && leadership === null) ||
-                        (step === 4 && clubType === null)
-                    }
-                >
+                  >
+                      <Text style={styles.nextButtonText}>Далее</Text>
+                  </TouchableOpacity>
+                )}
 
-                    {step === 5 ? (
-                      <TouchableOpacity
-                        style={styles.nextButton}
-                        onPress={() => router.replace('/(tabs)/')}
-                      >
-                          <Text style={styles.nextButtonText}>Завершить</Text>
-                      </TouchableOpacity>
-                    ) : (
-                      <TouchableOpacity
-                        style={styles.nextButton}
-                        onPress={handleNext}
-                      >
-                          <Text style={styles.nextButtonText}>Далее</Text>
-                      </TouchableOpacity>
-                    )}
+                {step < 5 && <Ionicons name="arrow-forward" size={20} color="#FFF" />}
 
-                    {step < 5 && <Ionicons name="arrow-forward" size={20} color="#FFF" />}
-                </TouchableOpacity>
             </View>
         </SafeAreaView>
     );

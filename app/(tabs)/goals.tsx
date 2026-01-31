@@ -10,10 +10,9 @@ import {
     Alert,
     SafeAreaView,
 } from 'react-native';
-import { Colors, Fonts, BorderRadius, Spacing, Shadows } from '@/constants/theme';
+import {Colors, Fonts, BorderRadius, Spacing, Shadows, Typography} from '@/constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 
-// ========== TYPES ==========
 interface SystemGoal {
     id: string;
     title: string;
@@ -100,7 +99,6 @@ const initialSystemGoals: SystemGoal[] = [
     },
 ];
 
-// ========== COMPONENTS ==========
 const GoalCard: React.FC<GoalCardProps> = ({ goal, onComplete }) => {
     type CategoryConfig = {
         [key in SystemGoal['category']]: {
@@ -289,7 +287,6 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ visible, onClose, onSubmit 
     );
 };
 
-// ========== MAIN COMPONENT ==========
 export default function Goals() {
     const [activeTab, setActiveTab] = useState<GoalTab>('system');
     const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
@@ -544,13 +541,12 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: Spacing.lg,
-        paddingTop: Spacing.lg,
+        paddingTop: Spacing.lg + 20,
         paddingBottom: Spacing.md,
     },
     headerTitle: {
-        fontSize: 32,
+        ...Typography.headline,
         fontFamily: Fonts.sans,
-        fontWeight: '800',
         color: Colors.light.neutral[800],
         marginBottom: Spacing.xs,
     },
