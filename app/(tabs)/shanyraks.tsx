@@ -17,7 +17,7 @@ import {
 import { MaterialIcons, FontAwesome5, AntDesign, Feather } from '@expo/vector-icons';
 import { Colors, Shadows, BorderRadius, Spacing, Typography } from '@/constants/theme'; // Импортируем цветовую схему
 
-// ========== TYPES ==========
+
 interface Shanyrak {
     id: string;
     name: string;
@@ -57,7 +57,7 @@ interface ActivityReport {
 
 type TabType = 'ranking' | 'history' | 'achievements';
 
-// ========== COMPONENT PROPS ==========
+
 interface ShanyrakRankingProps {
     shanyrak: Shanyrak;
     position: number;
@@ -508,7 +508,7 @@ const ActivityReportForm: React.FC<{
     );
 };
 
-// ========== MAIN COMPONENT ==========
+
 export default function Shanyraks() {
     const [shanyraks, setShanyraks] = useState<Shanyrak[]>([
         {
@@ -793,7 +793,7 @@ export default function Shanyraks() {
     );
 }
 
-// ========== STYLES ==========
+
 const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
     container: {

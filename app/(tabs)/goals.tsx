@@ -32,7 +32,6 @@ interface UserGoal {
 type GoalTab = 'system' | 'personal';
 type CategoryFilter = 'all' | 'study' | 'sport' | 'social' | 'creative';
 
-// ========== COMPONENT PROPS ==========
 interface GoalCardProps {
     goal: SystemGoal;
     onComplete: (id: string) => void;
@@ -55,7 +54,7 @@ interface AddGoalModalProps {
     onSubmit: (title: string) => void;
 }
 
-// ========== MOCK DATA ==========
+
 const initialSystemGoals: SystemGoal[] = [
     {
         id: '1',
@@ -530,7 +529,7 @@ export default function Goals() {
     );
 }
 
-// ========== STYLES ==========
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
