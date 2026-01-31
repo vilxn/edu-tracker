@@ -1,140 +1,204 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, Modal, Animated, Alert } from 'react-native';
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    StyleSheet,
+    ScrollView,
+    SafeAreaView,
+    Modal,
+    Animated,
+    TextInput,
+    Switch,
+    Dimensions
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons, FontAwesome5, Ionicons, AntDesign } from '@expo/vector-icons';
+import { MaterialIcons, FontAwesome5, Ionicons, AntDesign, Feather } from '@expo/vector-icons';
 import { AppRoute } from '@/constants/navigation';
 
-// Светлая цветовая палитра
-const LIGHT_PURPLE = '#7C3AED';
-const PURPLE = '#8B5CF6';
-const BLUE = '#3B82F6';
+const { width: screenWidth } = Dimensions.get('window');
+
+// Цветовая палитра
+const PRIMARY_PURPLE = '#7C3AED';
+const SECONDARY_PURPLE = '#8B5CF6';
+const ACCENT_BLUE = '#3B82F6';
 const LIGHT_BLUE = '#60A5FA';
-const DARK_BLUE = '#1E40AF';
-const ACCENT_PURPLE = '#A78BFA';
+const SUCCESS_GREEN = '#10B981';
+const WARNING_ORANGE = '#F59E0B';
+const ERROR_RED = '#EF4444';
+const NEUTRAL_GRAY = '#6B7280';
+const LIGHT_GRAY = '#F9FAFB';
+
+// Градиенты для разных элементов
+const GRADIENTS = {
+    primary: [PRIMARY_PURPLE, SECONDARY_PURPLE],
+    blue: [ACCENT_BLUE, LIGHT_BLUE],
+    green: [SUCCESS_GREEN, '#34D399'],
+    orange: [WARNING_ORANGE, '#FBBF24']
+};
 
 export default function HomeScreen() {
     const router = useRouter();
+
+    // Состояния для модальных окон
     const [profileVisible, setProfileVisible] = useState(false);
     const [personalDataVisible, setPersonalDataVisible] = useState(false);
     const [settingsVisible, setSettingsVisible] = useState(false);
     const [helpVisible, setHelpVisible] = useState(false);
-    const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
-    const openProfile = () => {
-        setProfileVisible(true);
-        Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-        }).start();
+    // Состояния для анимаций
+    const [fadeAnim] = useState(new Animated.Value(0));
+    const [slideAnim] = useState(new Animated.Value(50));
+
+    // Состояния для настроек
+    const [notifications, setNotifications] = useState(true);
+    const [darkMode, setDarkMode] = useState(false);
+    const [language, setLanguage] = useState('Русский');
+
+    // Функции для открытия модальных окон
+    const openModal = (modalType: 'profile' | 'personal' | 'settings' | 'help') => {
+        switch(modalType) {
+            case 'profile':
+                setProfileVisible(true);
+                break;
+            case 'personal':
+                setPersonalDataVisible(true);
+                break;
+            case 'settings':
+                setSettingsVisible(true);
+                break;
+            case 'help':
+                setHelpVisible(true);
+                break;
+        }
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            })
+        ]).start();
     };
 
-    const closeProfile = () => {
-        Animated.timing(fadeAnim, {
-            toValue: 0,
-            duration: 200,
-            useNativeDriver: true,
-        }).start(() => setProfileVisible(false));
+    const closeModal = (modalType: 'profile' | 'personal' | 'settings' | 'help') => {
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: true,
+            }),
+            Animated.timing(slideAnim, {
+                toValue: 50,
+                duration: 200,
+                useNativeDriver: true,
+            })
+        ]).start(() => {
+            switch(modalType) {
+                case 'profile':
+                    setProfileVisible(false);
+                    break;
+                case 'personal':
+                    setPersonalDataVisible(false);
+                    break;
+                case 'settings':
+                    setSettingsVisible(false);
+                    break;
+                case 'help':
+                    setHelpVisible(false);
+                    break;
+            }
+        });
     };
 
-    const handleLogout = () => {
-        Alert.alert(
-            'Выход из аккаунта',
-            'Вы точно хотите выйти?',
-            [
-                {
-                    text: 'Отмена',
-                    style: 'cancel',
-                    onPress: () => console.log('Отмена выхода')
-                },
-                {
-                    text: 'Выйти',
-                    style: 'destructive',
-                    onPress: () => {
-                        console.log('Выход выполнен');
-                        closeProfile();
-                        // Здесь добавьте логику выхода из приложения
-                        // Например: router.replace('/login');
-                    }
-                }
-            ]
-        );
-    };
-
+    // Данные для статистики
     const stats = [
-        { label: 'Активных шаныраков', value: '12', icon: 'trophy' },
-        { label: 'Мероприятий на этой неделе', value: '8', icon: 'calendar' },
-        { label: 'Выполнено целей', value: '47', icon: 'check-circle' },
-        { label: 'Учеников онлайн', value: '156', icon: 'users' },
+        { label: 'Активных шаныраков', value: '12', icon: 'trophy', gradient: GRADIENTS.primary },
+        { label: 'Мероприятий на неделе', value: '8', icon: 'calendar', gradient: GRADIENTS.blue },
+        { label: 'Выполнено целей', value: '47', icon: 'check-circle', gradient: GRADIENTS.green },
+        { label: 'Учеников онлайн', value: '156', icon: 'users', gradient: GRADIENTS.orange },
     ];
 
-    const quickActions: Array<{
-        title: string;
-        description: string;
-        route: AppRoute;
-        icon: string;
-        color: string;
-    }> = [
+    const quickActions = [
         {
             title: '🏆 Цифровые Шаныраки',
             description: 'Рейтинг команд и подача отчетов',
             route: '/shanyraks',
             icon: 'trophy',
-            color: '#EC4899'
+            gradient: GRADIENTS.primary
         },
         {
-            title: '📅 Мероприятия',
-            description: 'Расписание и подача заявок',
+            title: '📅 Event Management',
+            description: 'Расписание и бронирование локаций',
             route: '/events',
-            icon: 'calendar',
-            color: '#10B981'
+            icon: 'calendar-alt',
+            gradient: GRADIENTS.blue
         },
         {
-            title: '🎯 Цели',
-            description: 'Личные цели и задачи',
-            route: '/goals',
-            icon: 'target',
-            color: '#F59E0B'
-        },
-        {
-            title: '🏫 Проекты и Олимпиады',
+            title: '🎯 Проекты и Олимпиады',
             description: 'Команды и конкурсы',
             route: '/projects',
             icon: 'lightbulb',
-            color: BLUE
+            gradient: GRADIENTS.green
+        },
+        {
+            title: '📊 Личный прогресс',
+            description: 'Цели и достижения',
+            route: '/goals',
+            icon: 'chart-line',
+            gradient: GRADIENTS.orange
         },
     ];
 
     const recentActivities = [
-        { title: 'Шанырак "Алтын Орда" получил +50 баллов', time: '2 часа назад' },
-        { title: 'Новое мероприятие: "Научная ярмарка"', time: '5 часов назад' },
-        { title: 'Обновлен рейтинг шаныраков', time: 'Вчера' },
+        { title: 'Шанырак "Алтын Орда" получил +50 баллов за научный проект', time: '2 часа назад', icon: 'trophy' },
+        { title: 'Опубликовано новое положение о "Научной ярмарке"', time: '5 часов назад', icon: 'bullhorn' },
+        { title: 'Обновлен рейтинг шаныраков за неделю', time: 'Вчера', icon: 'chart-bar' },
+        { title: 'Забронирован актовый зал на мероприятие "День науки"', time: '2 дня назад', icon: 'calendar-check' },
     ];
 
-    const themeOptions = [
-        { name: 'Светлая', value: 'light', color: '#FFFFFF', textColor: '#000000' },
-        { name: 'Тёмная', value: 'dark', color: '#1F2937', textColor: '#FFFFFF' },
-        { name: 'Синяя', value: 'blue', color: '#1E40AF', textColor: '#FFFFFF' },
-        { name: 'Фиолетовая', value: 'purple', color: '#7C3AED', textColor: '#FFFFFF' },
-    ];
-
-    const [selectedTheme, setSelectedTheme] = useState('light');
+    // Рендер модального окна
+    const renderModal = (content: React.ReactNode, title: string, type: 'profile' | 'personal' | 'settings' | 'help') => (
+        <Modal
+            animationType="fade"
+            transparent={true}
+            visible={true}
+            onRequestClose={() => closeModal(type)}
+        >
+            <Animated.View style={[styles.modalOverlay, { opacity: fadeAnim }]}>
+                <Animated.View style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}>
+                    <View style={styles.modalHeader}>
+                        <Text style={styles.modalTitle}>{title}</Text>
+                        <TouchableOpacity onPress={() => closeModal(type)} style={styles.closeButton}>
+                            <AntDesign name="close" size={24} color="#666" />
+                        </TouchableOpacity>
+                    </View>
+                    {content}
+                </Animated.View>
+            </Animated.View>
+        </Modal>
+    );
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Верхняя панель с профилем */}
+            {/* Верхняя панель */}
             <View style={styles.header}>
                 <View>
                     <Text style={styles.greeting}>Добро пожаловать,</Text>
-                    <Text style={styles.userName}>Айсултан!</Text>
+                    <Text style={styles.userName}>Айсултан! 👋</Text>
+                    <Text style={styles.userRole}>Старший префект</Text>
                 </View>
                 <TouchableOpacity
                     style={styles.profileButton}
-                    onPress={openProfile}
+                    onPress={() => openModal('profile')}
                 >
                     <LinearGradient
-                        colors={[PURPLE, LIGHT_PURPLE]}
+                        colors={GRADIENTS.primary}
                         style={styles.profileGradient}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
@@ -144,44 +208,53 @@ export default function HomeScreen() {
                 </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
                 {/* Статистика */}
                 <View style={styles.statsContainer}>
-                    <Text style={styles.sectionTitle}>Общая статистика</Text>
-                    <View style={styles.statsGrid}>
+                    <Text style={styles.sectionTitle}>📈 Общая статистика</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statsScrollView}>
                         {stats.map((stat, index) => (
-                            <View key={index} style={styles.statCard}>
-                                <View style={[styles.statIconContainer, { backgroundColor: `${PURPLE}20` }]}>
-                                    <FontAwesome5 name={stat.icon} size={20} color={PURPLE} />
+                            <LinearGradient
+                                key={index}
+                                colors={stat.gradient}
+                                style={styles.statCard}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                            >
+                                <View style={styles.statIconContainer}>
+                                    <FontAwesome5 name={stat.icon} size={20} color="white" />
                                 </View>
                                 <Text style={styles.statValue}>{stat.value}</Text>
                                 <Text style={styles.statLabel}>{stat.label}</Text>
-                            </View>
+                            </LinearGradient>
                         ))}
-                    </View>
+                    </ScrollView>
                 </View>
 
                 {/* Основные разделы */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Основные разделы</Text>
+                    <Text style={styles.sectionTitle}>🚀 Основные разделы</Text>
                     <View style={styles.actionsGrid}>
                         {quickActions.map((action, index) => (
                             <TouchableOpacity
                                 key={index}
-                                style={[styles.actionCard, { borderLeftColor: action.color }]}
+                                style={styles.actionCard}
                                 onPress={() => router.push(action.route)}
                                 activeOpacity={0.8}
                             >
-                                <View style={styles.actionContent}>
-                                    <View style={[styles.actionIconContainer, { backgroundColor: `${action.color}20` }]}>
-                                        <FontAwesome5 name={action.icon} size={24} color={action.color} />
-                                    </View>
+                                <LinearGradient
+                                    colors={action.gradient}
+                                    style={styles.actionGradient}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                >
+                                    <FontAwesome5 name={action.icon} size={24} color="white" />
+                                </LinearGradient>
+                                <View style={styles.actionTextContainer}>
                                     <Text style={styles.actionTitle}>{action.title}</Text>
                                     <Text style={styles.actionDescription}>{action.description}</Text>
-                                    <View style={styles.actionArrow}>
-                                        <MaterialIcons name="arrow-forward" size={20} color={action.color} />
-                                    </View>
                                 </View>
+                                <MaterialIcons name="chevron-right" size={24} color={NEUTRAL_GRAY} />
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -190,7 +263,7 @@ export default function HomeScreen() {
                 {/* Последние активности */}
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionTitle}>Последние активности</Text>
+                        <Text style={styles.sectionTitle}>📝 Последние активности</Text>
                         <TouchableOpacity>
                             <Text style={styles.viewAllText}>Все →</Text>
                         </TouchableOpacity>
@@ -198,7 +271,9 @@ export default function HomeScreen() {
                     <View style={styles.activitiesContainer}>
                         {recentActivities.map((activity, index) => (
                             <View key={index} style={styles.activityItem}>
-                                <View style={styles.activityDot} />
+                                <View style={[styles.activityIcon, { backgroundColor: `${PRIMARY_PURPLE}20` }]}>
+                                    <FontAwesome5 name={activity.icon} size={16} color={PRIMARY_PURPLE} />
+                                </View>
                                 <View style={styles.activityContent}>
                                     <Text style={styles.activityTitle}>{activity.title}</Text>
                                     <Text style={styles.activityTime}>{activity.time}</Text>
@@ -210,61 +285,49 @@ export default function HomeScreen() {
 
                 {/* Призыв к действию */}
                 <LinearGradient
-                    colors={[PURPLE, LIGHT_PURPLE]}
+                    colors={GRADIENTS.primary}
                     style={styles.ctaCard}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                 >
                     <View style={styles.ctaContent}>
-                        <FontAwesome5 name="rocket" size={32} color="white" />
+                        <FontAwesome5 name="rocket" size={36} color="white" />
                         <View style={styles.ctaTextContainer}>
                             <Text style={styles.ctaTitle}>Начни свой путь к успеху!</Text>
                             <Text style={styles.ctaDescription}>
                                 Присоединяйся к мероприятиям, ставь цели и веди свой шанырак к победе
                             </Text>
                         </View>
-                        <TouchableOpacity style={styles.ctaButton}>
-                            <Text style={styles.ctaButtonText}>Начать сейчас</Text>
+                        <TouchableOpacity
+                            style={styles.ctaButton}
+                            onPress={() => router.push('/events')}
+                        >
+                            <Text style={styles.ctaButtonText}>Начать сейчас →</Text>
                         </TouchableOpacity>
                     </View>
                 </LinearGradient>
 
                 {/* Футер */}
                 <View style={styles.footer}>
-                    <Text style={styles.footerText}>Школьная цифровая платформа v1.0</Text>
+                    <Text style={styles.footerText}>Школьная цифровая платформа v2.0</Text>
                     <Text style={styles.footerSubtext}>Объединяем школу в цифровом пространстве</Text>
                 </View>
             </ScrollView>
 
             {/* Модальное окно профиля */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={profileVisible}
-                onRequestClose={closeProfile}
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Профиль</Text>
-                            <TouchableOpacity onPress={closeProfile} style={styles.closeButton}>
-                                <AntDesign name="close" size={24} color="#666" />
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={styles.profileInfo}>
-                            <LinearGradient
-                                colors={[PURPLE, LIGHT_PURPLE]}
-                                style={styles.profileImage}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 1 }}
-                            >
-                                <MaterialIcons name="person" size={40} color="white" />
-                            </LinearGradient>
-                            <Text style={styles.profileName}>Айсултан Ахметов</Text>
-                            <Text style={styles.profileEmail}>aisultan@school.kz</Text>
-                        </View>
-
+            {profileVisible && renderModal(
+                <View style={styles.modalBody}>
+                    <View style={styles.profileInfo}>
+                        <LinearGradient
+                            colors={GRADIENTS.primary}
+                            style={styles.profileImage}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                        >
+                            <MaterialIcons name="person" size={40} color="white" />
+                        </LinearGradient>
+                        <Text style={styles.profileName}>Айсултан Ахметов</Text>
+                        <Text style={styles.profileEmail}>aisultan@school.kz</Text>
                         <View style={styles.profileStats}>
                             <View style={styles.profileStat}>
                                 <Text style={styles.profileStatValue}>8</Text>
@@ -279,320 +342,185 @@ export default function HomeScreen() {
                                 <Text style={styles.profileStatLabel}>Баллов</Text>
                             </View>
                         </View>
-
-                        <View style={styles.profileMenu}>
-                            <TouchableOpacity
-                                style={styles.menuItem}
-                                onPress={() => {
-                                    closeProfile();
-                                    setTimeout(() => setPersonalDataVisible(true), 100);
-                                }}
-                            >
-                                <MaterialIcons name="person-outline" size={24} color="#666" />
-                                <Text style={styles.menuText}>Личные данные</Text>
-                                <MaterialIcons name="chevron-right" size={24} color="#999" />
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={styles.menuItem}
-                                onPress={() => {
-                                    closeProfile();
-                                    setTimeout(() => setSettingsVisible(true), 100);
-                                }}
-                            >
-                                <MaterialIcons name="settings" size={24} color="#666" />
-                                <Text style={styles.menuText}>Настройки</Text>
-                                <MaterialIcons name="chevron-right" size={24} color="#999" />
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={styles.menuItem}
-                                onPress={() => {
-                                    closeProfile();
-                                    setTimeout(() => setHelpVisible(true), 100);
-                                }}
-                            >
-                                <MaterialIcons name="help-outline" size={24} color="#666" />
-                                <Text style={styles.menuText}>Помощь</Text>
-                                <MaterialIcons name="chevron-right" size={24} color="#999" />
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={styles.menuItem}
-                                onPress={handleLogout}
-                            >
-                                <MaterialIcons name="logout" size={24} color="#EF4444" />
-                                <Text style={[styles.menuText, { color: '#EF4444' }]}>Выйти</Text>
-                                <MaterialIcons name="chevron-right" size={24} color="#999" />
-                            </TouchableOpacity>
-                        </View>
                     </View>
-                </View>
-            </Modal>
+
+                    <View style={styles.profileMenu}>
+                        <TouchableOpacity
+                            style={styles.menuItem}
+                            onPress={() => {
+                                closeModal('profile');
+                                setTimeout(() => openModal('personal'), 100);
+                            }}
+                        >
+                            <Feather name="user" size={22} color={PRIMARY_PURPLE} />
+                            <Text style={styles.menuText}>Личные данные</Text>
+                            <MaterialIcons name="chevron-right" size={24} color="#999" />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.menuItem}
+                            onPress={() => {
+                                closeModal('profile');
+                                setTimeout(() => openModal('settings'), 100);
+                            }}
+                        >
+                            <Feather name="settings" size={22} color={PRIMARY_PURPLE} />
+                            <Text style={styles.menuText}>Настройки</Text>
+                            <MaterialIcons name="chevron-right" size={24} color="#999" />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.menuItem}
+                            onPress={() => {
+                                closeModal('profile');
+                                setTimeout(() => openModal('help'), 100);
+                            }}
+                        >
+                            <Feather name="help-circle" size={22} color={PRIMARY_PURPLE} />
+                            <Text style={styles.menuText}>Помощь</Text>
+                            <MaterialIcons name="chevron-right" size={24} color="#999" />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.menuItem}>
+                            <Feather name="log-out" size={22} color={ERROR_RED} />
+                            <Text style={[styles.menuText, { color: ERROR_RED }]}>Выйти</Text>
+                            <MaterialIcons name="chevron-right" size={24} color="#999" />
+                        </TouchableOpacity>
+                    </View>
+                </View>,
+                'Профиль',
+                'profile'
+            )}
 
             {/* Модальное окно личных данных */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={personalDataVisible}
-                onRequestClose={() => setPersonalDataVisible(false)}
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <TouchableOpacity onPress={() => setPersonalDataVisible(false)} style={styles.backButton}>
-                                <AntDesign name="arrowleft" size={24} color="#666" />
-                            </TouchableOpacity>
-                            <Text style={styles.modalTitle}>Личные данные</Text>
-                            <View style={styles.closeButton} />
-                        </View>
-
-                        <ScrollView style={styles.personalDataContent}>
-                            <View style={styles.infoSection}>
-                                <Text style={styles.infoSectionTitle}>Основная информация</Text>
-                                <View style={styles.infoRow}>
-                                    <Text style={styles.infoLabel}>ФИО:</Text>
-                                    <Text style={styles.infoValue}>Ахметов Айсултан Бахытжанулы</Text>
-                                </View>
-                                <View style={styles.infoRow}>
-                                    <Text style={styles.infoLabel}>Дата рождения:</Text>
-                                    <Text style={styles.infoValue}>15.03.2007</Text>
-                                </View>
-                                <View style={styles.infoRow}>
-                                    <Text style={styles.infoLabel}>Класс:</Text>
-                                    <Text style={styles.infoValue}>10 "А"</Text>
-                                </View>
-                                <View style={styles.infoRow}>
-                                    <Text style={styles.infoLabel}>Школа:</Text>
-                                    <Text style={styles.infoValue}>НИШ ФМН г. Астана</Text>
-                                </View>
-                            </View>
-
-                            <View style={styles.infoSection}>
-                                <Text style={styles.infoSectionTitle}>Шанырак</Text>
-                                <View style={styles.shanyrakInfo}>
-                                    <View style={styles.shanyrakBadge}>
-                                        <FontAwesome5 name="trophy" size={20} color={PURPLE} />
-                                        <Text style={styles.shanyrakName}>Алтын Орда</Text>
-                                    </View>
-                                    <View style={styles.infoRow}>
-                                        <Text style={styles.infoLabel}>Статус:</Text>
-                                        <Text style={[styles.infoValue, { color: '#10B981' }]}>Активный член</Text>
-                                    </View>
-                                    <View style={styles.infoRow}>
-                                        <Text style={styles.infoLabel}>Роль:</Text>
-                                        <Text style={styles.infoValue}>Капитан команды</Text>
-                                    </View>
-                                    <View style={styles.infoRow}>
-                                        <Text style={styles.infoLabel}>Баллы команды:</Text>
-                                        <Text style={[styles.infoValue, { color: PURPLE, fontWeight: 'bold' }]}>850</Text>
-                                    </View>
-                                    <View style={styles.infoRow}>
-                                        <Text style={styles.infoLabel}>Место в рейтинге:</Text>
-                                        <Text style={[styles.infoValue, { color: '#F59E0B' }]}>3 место</Text>
-                                    </View>
-                                </View>
-                            </View>
-
-                            <View style={styles.infoSection}>
-                                <Text style={styles.infoSectionTitle}>Контактная информация</Text>
-                                <View style={styles.infoRow}>
-                                    <Text style={styles.infoLabel}>Email:</Text>
-                                    <Text style={styles.infoValue}>aisultan@school.kz</Text>
-                                </View>
-                                <View style={styles.infoRow}>
-                                    <Text style={styles.infoLabel}>Телефон:</Text>
-                                    <Text style={styles.infoValue}>+7 777 123 4567</Text>
-                                </View>
-                            </View>
-                        </ScrollView>
+            {personalDataVisible && renderModal(
+                <ScrollView style={styles.modalBody}>
+                    <View style={styles.formGroup}>
+                        <Text style={styles.formLabel}>Имя и фамилия</Text>
+                        <TextInput
+                            style={styles.input}
+                            defaultValue="Айсултан Ахметов"
+                            placeholder="Введите имя и фамилию"
+                        />
                     </View>
-                </View>
-            </Modal>
+
+                    <View style={styles.formGroup}>
+                        <Text style={styles.formLabel}>Электронная почта</Text>
+                        <TextInput
+                            style={styles.input}
+                            defaultValue="aisultan@school.kz"
+                            placeholder="Введите email"
+                            keyboardType="email-address"
+                        />
+                    </View>
+
+                    <View style={styles.formGroup}>
+                        <Text style={styles.formLabel}>Класс</Text>
+                        <TextInput
+                            style={styles.input}
+                            defaultValue="11A"
+                            placeholder="Введите класс"
+                        />
+                    </View>
+
+                    <View style={styles.formGroup}>
+                        <Text style={styles.formLabel}>Телефон</Text>
+                        <TextInput
+                            style={styles.input}
+                            defaultValue="+7 777 123 45 67"
+                            placeholder="Введите телефон"
+                            keyboardType="phone-pad"
+                        />
+                    </View>
+
+                    <TouchableOpacity style={styles.saveButton}>
+                        <Text style={styles.saveButtonText}>Сохранить изменения</Text>
+                    </TouchableOpacity>
+                </ScrollView>,
+                'Личные данные',
+                'personal'
+            )}
 
             {/* Модальное окно настроек */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={settingsVisible}
-                onRequestClose={() => setSettingsVisible(false)}
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <TouchableOpacity onPress={() => setSettingsVisible(false)} style={styles.backButton}>
-                                <AntDesign name="arrowleft" size={24} color="#666" />
-                            </TouchableOpacity>
-                            <Text style={styles.modalTitle}>Настройки</Text>
-                            <View style={styles.closeButton} />
+            {settingsVisible && renderModal(
+                <ScrollView style={styles.modalBody}>
+                    <View style={styles.settingItem}>
+                        <View>
+                            <Text style={styles.settingTitle}>Уведомления</Text>
+                            <Text style={styles.settingDescription}>Получать уведомления о новых мероприятиях</Text>
                         </View>
-
-                        <ScrollView style={styles.settingsContent}>
-                            <View style={styles.settingsSection}>
-                                <Text style={styles.settingsSectionTitle}>Тема приложения</Text>
-                                <Text style={styles.settingsDescription}>Выберите цветовую тему</Text>
-
-                                <View style={styles.themeGrid}>
-                                    {themeOptions.map((theme) => (
-                                        <TouchableOpacity
-                                            key={theme.value}
-                                            style={[
-                                                styles.themeOption,
-                                                {
-                                                    backgroundColor: theme.color,
-                                                    borderColor: selectedTheme === theme.value ? PURPLE : '#E5E7EB'
-                                                }
-                                            ]}
-                                            onPress={() => setSelectedTheme(theme.value)}
-                                        >
-                                            <Text style={[styles.themeName, { color: theme.textColor }]}>
-                                                {theme.name}
-                                            </Text>
-                                            {selectedTheme === theme.value && (
-                                                <View style={styles.selectedIndicator}>
-                                                    <AntDesign name="check" size={16} color="#FFFFFF" />
-                                                </View>
-                                            )}
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            </View>
-
-                            <View style={styles.settingsSection}>
-                                <Text style={styles.settingsSectionTitle}>Уведомления</Text>
-                                <View style={styles.settingItem}>
-                                    <View>
-                                        <Text style={styles.settingLabel}>Push-уведомления</Text>
-                                        <Text style={styles.settingDescription}>Получать уведомления о событиях</Text>
-                                    </View>
-                                    <TouchableOpacity style={styles.switch}>
-                                        <View style={[styles.switchTrack, { backgroundColor: '#10B981' }]}>
-                                            <View style={styles.switchThumb} />
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
-
-                                <View style={styles.settingItem}>
-                                    <View>
-                                        <Text style={styles.settingLabel}>Email-уведомления</Text>
-                                        <Text style={styles.settingDescription}>Получать новости на почту</Text>
-                                    </View>
-                                    <TouchableOpacity style={styles.switch}>
-                                        <View style={[styles.switchTrack, { backgroundColor: '#9CA3AF' }]}>
-                                            <View style={[styles.switchThumb, { transform: [{ translateX: 16 }] }]} />
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-
-                            <View style={styles.settingsSection}>
-                                <Text style={styles.settingsSectionTitle}>Конфиденциальность</Text>
-                                <TouchableOpacity style={styles.settingsButton}>
-                                    <Text style={styles.settingsButtonText}>Изменить пароль</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.settingsButton}>
-                                    <Text style={styles.settingsButtonText}>Настройки конфиденциальности</Text>
-                                </TouchableOpacity>
-                            </View>
-
-                            <View style={styles.settingsSection}>
-                                <Text style={styles.settingsSectionTitle}>О приложении</Text>
-                                <Text style={styles.versionText}>Версия 1.0.0</Text>
-                                <Text style={styles.buildText}>Сборка 2024.01</Text>
-                            </View>
-                        </ScrollView>
+                        <Switch
+                            value={notifications}
+                            onValueChange={setNotifications}
+                            trackColor={{ false: '#E5E7EB', true: PRIMARY_PURPLE }}
+                        />
                     </View>
-                </View>
-            </Modal>
+
+                    <View style={styles.settingItem}>
+                        <View>
+                            <Text style={styles.settingTitle}>Темная тема</Text>
+                            <Text style={styles.settingDescription}>Использовать темную тему оформления</Text>
+                        </View>
+                        <Switch
+                            value={darkMode}
+                            onValueChange={setDarkMode}
+                            trackColor={{ false: '#E5E7EB', true: PRIMARY_PURPLE }}
+                        />
+                    </View>
+
+                    <View style={styles.settingItem}>
+                        <View>
+                            <Text style={styles.settingTitle}>Язык</Text>
+                            <Text style={styles.settingDescription}>Язык интерфейса приложения</Text>
+                        </View>
+                        <TouchableOpacity style={styles.languageButton}>
+                            <Text style={styles.languageText}>{language}</Text>
+                            <MaterialIcons name="arrow-drop-down" size={24} color={NEUTRAL_GRAY} />
+                        </TouchableOpacity>
+                    </View>
+
+                    <TouchableOpacity style={styles.saveButton}>
+                        <Text style={styles.saveButtonText}>Применить настройки</Text>
+                    </TouchableOpacity>
+                </ScrollView>,
+                'Настройки',
+                'settings'
+            )}
 
             {/* Модальное окно помощи */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={helpVisible}
-                onRequestClose={() => setHelpVisible(false)}
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <TouchableOpacity onPress={() => setHelpVisible(false)} style={styles.backButton}>
-                                <AntDesign name="arrowleft" size={24} color="#666" />
-                            </TouchableOpacity>
-                            <Text style={styles.modalTitle}>Помощь</Text>
-                            <View style={styles.closeButton} />
+            {helpVisible && renderModal(
+                <ScrollView style={styles.modalBody}>
+                    <View style={styles.helpSection}>
+                        <Text style={styles.helpTitle}>Часто задаваемые вопросы</Text>
+                        <View style={styles.faqItem}>
+                            <Text style={styles.faqQuestion}>Как подать отчет о мероприятии?</Text>
+                            <Text style={styles.faqAnswer}>Перейдите в раздел "Цифровые Шаныраки" и нажмите "Подать отчет"</Text>
                         </View>
-
-                        <ScrollView style={styles.helpContent}>
-                            <View style={styles.helpSection}>
-                                <Text style={styles.helpSectionTitle}>Часто задаваемые вопросы</Text>
-
-                                <View style={styles.faqItem}>
-                                    <Text style={styles.faqQuestion}>Как подать отчет по шаныраку?</Text>
-                                    <Text style={styles.faqAnswer}>
-                                        Перейдите в раздел "Цифровые Шаныраки", выберите ваш шанырак и нажмите "Подать отчет". Заполните форму и отправьте на проверку.
-                                    </Text>
-                                </View>
-
-                                <View style={styles.faqItem}>
-                                    <Text style={styles.faqQuestion}>Как записаться на мероприятие?</Text>
-                                    <Text style={styles.faqAnswer}>
-                                        В разделе "Мероприятия" выберите интересующее вас событие и нажмите "Записаться". Вы получите уведомление о подтверждении.
-                                    </Text>
-                                </View>
-
-                                <View style={styles.faqItem}>
-                                    <Text style={styles.faqQuestion}>Как добавить цель?</Text>
-                                    <Text style={styles.faqAnswer}>
-                                        В разделе "Цели" нажмите на кнопку "+", заполните информацию о цели и установите срок выполнения.
-                                    </Text>
-                                </View>
-                            </View>
-
-                            <View style={styles.helpSection}>
-                                <Text style={styles.helpSectionTitle}>Техническая поддержка</Text>
-
-                                <TouchableOpacity style={styles.supportContact}>
-                                    <View style={styles.supportIcon}>
-                                        <MaterialIcons name="email" size={24} color={PURPLE} />
-                                    </View>
-                                    <View style={styles.supportInfo}>
-                                        <Text style={styles.supportTitle}>Email поддержка</Text>
-                                        <Text style={styles.supportValue}>support@school.kz</Text>
-                                    </View>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity style={styles.supportContact}>
-                                    <View style={styles.supportIcon}>
-                                        <MaterialIcons name="phone" size={24} color={PURPLE} />
-                                    </View>
-                                    <View style={styles.supportInfo}>
-                                        <Text style={styles.supportTitle}>Телефон поддержки</Text>
-                                        <Text style={styles.supportValue}>+7 7172 123 456</Text>
-                                    </View>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity style={styles.supportContact}>
-                                    <View style={styles.supportIcon}>
-                                        <MaterialIcons name="chat" size={24} color={PURPLE} />
-                                    </View>
-                                    <View style={styles.supportInfo}>
-                                        <Text style={styles.supportTitle}>Онлайн-чат</Text>
-                                        <Text style={styles.supportValue}>Доступен с 9:00 до 18:00</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            </View>
-
-                            <View style={styles.helpSection}>
-                                <Text style={styles.helpSectionTitle}>Руководство пользователя</Text>
-                                <TouchableOpacity style={styles.downloadButton}>
-                                    <MaterialIcons name="file-download" size={20} color="#FFFFFF" />
-                                    <Text style={styles.downloadButtonText}>Скачать руководство (PDF)</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </ScrollView>
+                        <View style={styles.faqItem}>
+                            <Text style={styles.faqQuestion}>Как забронировать локацию?</Text>
+                            <Text style={styles.faqAnswer}>В разделе "Event Management" выберите дату и свободную локацию</Text>
+                        </View>
+                        <View style={styles.faqItem}>
+                            <Text style={styles.faqQuestion}>Как вступить в команду проекта?</Text>
+                            <Text style={styles.faqAnswer}>В разделе "Проекты и Олимпиады" выберите интересующий проект и подайте заявку</Text>
+                        </View>
                     </View>
-                </View>
-            </Modal>
+
+                    <View style={styles.helpSection}>
+                        <Text style={styles.helpTitle}>Техническая поддержка</Text>
+                        <TouchableOpacity style={styles.supportButton}>
+                            <Feather name="mail" size={20} color={PRIMARY_PURPLE} />
+                            <Text style={styles.supportButtonText}>support@school.kz</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.supportButton}>
+                            <Feather name="phone" size={20} color={PRIMARY_PURPLE} />
+                            <Text style={styles.supportButtonText}>+7 777 000 00 00</Text>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>,
+                'Помощь',
+                'help'
+            )}
         </SafeAreaView>
     );
 }
@@ -602,43 +530,265 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#FFFFFF',
     },
+    scrollView: {
+        flex: 1,
+    },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingTop: 10,
-        paddingBottom: 20,
+        paddingHorizontal: 24,
+        paddingTop: 16,
+        paddingBottom: 24,
         backgroundColor: '#FFFFFF',
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F4F6',
     },
     greeting: {
         fontSize: 14,
-        color: '#666666',
-        fontFamily: 'Inter_400Regular',
+        color: NEUTRAL_GRAY,
+        fontFamily: 'Inter-Regular',
+        marginBottom: 2,
     },
     userName: {
-        fontSize: 24,
-        color: '#1F2937',
-        fontFamily: 'Inter_700Bold',
-        marginTop: 2,
+        fontSize: 28,
+        color: '#111827',
+        fontFamily: 'Inter-Bold',
+        marginBottom: 4,
+    },
+    userRole: {
+        fontSize: 14,
+        color: PRIMARY_PURPLE,
+        fontFamily: 'Inter-SemiBold',
+        backgroundColor: `${PRIMARY_PURPLE}15`,
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 12,
+        alignSelf: 'flex-start',
     },
     profileButton: {
-        width: 48,
-        height: 48,
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        shadowColor: PRIMARY_PURPLE,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 6,
     },
     profileGradient: {
         width: '100%',
         height: '100%',
-        borderRadius: 24,
+        borderRadius: 28,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: PURPLE,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
+    },
+    statsContainer: {
+        paddingHorizontal: 24,
+        marginBottom: 24,
+    },
+    statsScrollView: {
+        paddingVertical: 4,
+    },
+    section: {
+        paddingHorizontal: 24,
+        marginBottom: 24,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        color: '#111827',
+        fontFamily: 'Inter-Bold',
+        marginBottom: 16,
+    },
+    statCard: {
+        width: 160,
+        height: 140,
+        borderRadius: 20,
+        padding: 20,
+        marginRight: 12,
+        justifyContent: 'space-between',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
         elevation: 4,
     },
-    // Стили для модальных окон
+    statIconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 12,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 12,
+    },
+    statValue: {
+        fontSize: 28,
+        color: '#FFFFFF',
+        fontFamily: 'Inter-ExtraBold',
+        marginBottom: 4,
+    },
+    statLabel: {
+        fontSize: 13,
+        color: 'rgba(255, 255, 255, 0.9)',
+        fontFamily: 'Inter-Medium',
+        lineHeight: 16,
+    },
+    actionsGrid: {
+        gap: 12,
+    },
+    actionCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 16,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    actionGradient: {
+        width: 48,
+        height: 48,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 16,
+    },
+    actionTextContainer: {
+        flex: 1,
+    },
+    actionTitle: {
+        fontSize: 16,
+        color: '#111827',
+        fontFamily: 'Inter-SemiBold',
+        marginBottom: 4,
+    },
+    actionDescription: {
+        fontSize: 13,
+        color: NEUTRAL_GRAY,
+        fontFamily: 'Inter-Regular',
+        lineHeight: 18,
+    },
+    viewAllText: {
+        color: PRIMARY_PURPLE,
+        fontFamily: 'Inter-SemiBold',
+        fontSize: 14,
+    },
+    activitiesContainer: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 16,
+        padding: 20,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    activityItem: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        marginBottom: 16,
+    },
+    activityIcon: {
+        width: 36,
+        height: 36,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 12,
+        marginTop: 2,
+    },
+    activityContent: {
+        flex: 1,
+    },
+    activityTitle: {
+        fontSize: 14,
+        color: '#111827',
+        fontFamily: 'Inter-Medium',
+        marginBottom: 4,
+        lineHeight: 20,
+    },
+    activityTime: {
+        fontSize: 12,
+        color: '#9CA3AF',
+        fontFamily: 'Inter-Regular',
+    },
+    ctaCard: {
+        marginHorizontal: 24,
+        marginBottom: 24,
+        borderRadius: 24,
+        padding: 28,
+        shadowColor: PRIMARY_PURPLE,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.3,
+        shadowRadius: 16,
+        elevation: 12,
+    },
+    ctaContent: {
+        alignItems: 'center',
+    },
+    ctaTextContainer: {
+        alignItems: 'center',
+        marginVertical: 20,
+    },
+    ctaTitle: {
+        fontSize: 22,
+        color: 'white',
+        fontFamily: 'Inter-Bold',
+        textAlign: 'center',
+        marginBottom: 8,
+    },
+    ctaDescription: {
+        fontSize: 14,
+        color: 'rgba(255, 255, 255, 0.9)',
+        fontFamily: 'Inter-Regular',
+        textAlign: 'center',
+        lineHeight: 22,
+    },
+    ctaButton: {
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        paddingHorizontal: 32,
+        paddingVertical: 14,
+        borderRadius: 12,
+        marginTop: 8,
+    },
+    ctaButtonText: {
+        fontSize: 16,
+        color: PRIMARY_PURPLE,
+        fontFamily: 'Inter-SemiBold',
+    },
+    footer: {
+        alignItems: 'center',
+        paddingVertical: 32,
+        borderTopWidth: 1,
+        borderTopColor: '#E5E7EB',
+        marginTop: 8,
+    },
+    footerText: {
+        fontSize: 14,
+        color: NEUTRAL_GRAY,
+        fontFamily: 'Inter-Medium',
+        marginBottom: 4,
+    },
+    footerSubtext: {
+        fontSize: 12,
+        color: '#9CA3AF',
+        fontFamily: 'Inter-Regular',
+    },
+    // Модальные окна
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -648,201 +798,121 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
-        paddingBottom: 40,
-        maxHeight: '90%',
+        maxHeight: '85%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 10,
     },
     modalHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 20,
+        padding: 24,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E7EB',
+        borderBottomColor: '#F3F4F6',
     },
     modalTitle: {
-        fontSize: 20,
-        color: '#1F2937',
-        fontFamily: 'Inter_700Bold',
-        flex: 1,
-        textAlign: 'center',
+        fontSize: 22,
+        color: '#111827',
+        fontFamily: 'Inter-Bold',
     },
     closeButton: {
         padding: 4,
-        width: 32,
     },
-    backButton: {
-        padding: 4,
-        width: 32,
+    modalBody: {
+        padding: 24,
     },
+    // Профиль
     profileInfo: {
         alignItems: 'center',
-        padding: 32,
+        marginBottom: 24,
     },
     profileImage: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 100,
+        height: 100,
+        borderRadius: 50,
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 16,
-        shadowColor: PURPLE,
+        shadowColor: PRIMARY_PURPLE,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
         elevation: 8,
     },
     profileName: {
-        fontSize: 24,
-        color: '#1F2937',
-        fontFamily: 'Inter_700Bold',
+        fontSize: 22,
+        color: '#111827',
+        fontFamily: 'Inter-Bold',
         marginBottom: 4,
+        textAlign: 'center',
     },
     profileEmail: {
         fontSize: 14,
-        color: '#6B7280',
-        fontFamily: 'Inter_400Regular',
+        color: NEUTRAL_GRAY,
+        fontFamily: 'Inter-Regular',
+        marginBottom: 20,
     },
     profileStats: {
         flexDirection: 'row',
         justifyContent: 'space-around',
+        width: '100%',
         paddingHorizontal: 20,
-        marginBottom: 32,
-        paddingBottom: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: '#E5E7EB',
     },
     profileStat: {
         alignItems: 'center',
     },
     profileStatValue: {
-        fontSize: 20,
-        color: PURPLE,
-        fontFamily: 'Inter_800ExtraBold',
+        fontSize: 24,
+        color: PRIMARY_PURPLE,
+        fontFamily: 'Inter-ExtraBold',
         marginBottom: 4,
     },
     profileStatLabel: {
         fontSize: 12,
-        color: '#6B7280',
-        fontFamily: 'Inter_400Regular',
+        color: NEUTRAL_GRAY,
+        fontFamily: 'Inter-Regular',
     },
     profileMenu: {
-        paddingHorizontal: 20,
+        gap: 4,
     },
     menuItem: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F3F4F6',
+        paddingHorizontal: 8,
+        borderRadius: 12,
     },
     menuText: {
         flex: 1,
         fontSize: 16,
         color: '#374151',
-        fontFamily: 'Inter_500Medium',
+        fontFamily: 'Inter-Medium',
         marginLeft: 16,
     },
-    // Стили для личных данных
-    personalDataContent: {
-        paddingHorizontal: 20,
+    // Формы
+    formGroup: {
+        marginBottom: 20,
     },
-    infoSection: {
-        marginBottom: 24,
-        paddingTop: 20,
-    },
-    infoSectionTitle: {
-        fontSize: 18,
-        color: '#1F2937',
-        fontFamily: 'Inter_700Bold',
-        marginBottom: 16,
-    },
-    infoRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: 12,
-        paddingVertical: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F3F4F6',
-    },
-    infoLabel: {
+    formLabel: {
         fontSize: 14,
-        color: '#6B7280',
-        fontFamily: 'Inter_400Regular',
-        flex: 1,
-    },
-    infoValue: {
-        fontSize: 14,
-        color: '#1F2937',
-        fontFamily: 'Inter_500Medium',
-        flex: 2,
-        textAlign: 'right',
-    },
-    shanyrakInfo: {
-        backgroundColor: '#F9FAFB',
-        borderRadius: 12,
-        padding: 16,
-    },
-    shanyrakBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    shanyrakName: {
-        fontSize: 18,
-        color: PURPLE,
-        fontFamily: 'Inter_700Bold',
-        marginLeft: 12,
-    },
-    // Стили для настроек
-    settingsContent: {
-        paddingHorizontal: 20,
-    },
-    settingsSection: {
-        marginBottom: 24,
-        paddingTop: 20,
-    },
-    settingsSectionTitle: {
-        fontSize: 18,
-        color: '#1F2937',
-        fontFamily: 'Inter_700Bold',
+        color: '#374151',
+        fontFamily: 'Inter-Medium',
         marginBottom: 8,
     },
-    settingsDescription: {
-        fontSize: 14,
-        color: '#6B7280',
-        fontFamily: 'Inter_400Regular',
-        marginBottom: 16,
-    },
-    themeGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 12,
-    },
-    themeOption: {
-        width: '48%',
-        height: 100,
+    input: {
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
         borderRadius: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 2,
-        position: 'relative',
-    },
-    themeName: {
+        padding: 16,
         fontSize: 16,
-        fontFamily: 'Inter_600SemiBold',
+        fontFamily: 'Inter-Regular',
+        color: '#111827',
+        backgroundColor: LIGHT_GRAY,
     },
-    selectedIndicator: {
-        position: 'absolute',
-        top: 8,
-        right: 8,
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: PURPLE,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
+    // Настройки
     settingItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -851,134 +921,85 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#F3F4F6',
     },
-    settingLabel: {
+    settingTitle: {
         fontSize: 16,
-        color: '#1F2937',
-        fontFamily: 'Inter_500Medium',
+        color: '#111827',
+        fontFamily: 'Inter-Medium',
         marginBottom: 4,
     },
     settingDescription: {
+        fontSize: 13,
+        color: NEUTRAL_GRAY,
+        fontFamily: 'Inter-Regular',
+    },
+    languageButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: LIGHT_GRAY,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+    },
+    languageText: {
         fontSize: 14,
-        color: '#6B7280',
-        fontFamily: 'Inter_400Regular',
+        color: '#111827',
+        fontFamily: 'Inter-Medium',
+        marginRight: 8,
     },
-    switch: {
-        padding: 4,
-    },
-    switchTrack: {
-        width: 48,
-        height: 24,
-        borderRadius: 12,
-        justifyContent: 'center',
-        paddingHorizontal: 2,
-    },
-    switchThumb: {
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        backgroundColor: 'white',
-    },
-    settingsButton: {
-        backgroundColor: '#F3F4F6',
-        padding: 16,
-        borderRadius: 12,
-        marginBottom: 12,
-    },
-    settingsButtonText: {
-        fontSize: 16,
-        color: '#1F2937',
-        fontFamily: 'Inter_500Medium',
-        textAlign: 'center',
-    },
-    versionText: {
-        fontSize: 16,
-        color: '#1F2937',
-        fontFamily: 'Inter_400Regular',
-        marginBottom: 4,
-    },
-    buildText: {
-        fontSize: 14,
-        color: '#6B7280',
-        fontFamily: 'Inter_400Regular',
-    },
-    // Стили для помощи
-    helpContent: {
-        paddingHorizontal: 20,
-    },
+    // Помощь
     helpSection: {
-        marginBottom: 24,
-        paddingTop: 20,
+        marginBottom: 32,
     },
-    helpSectionTitle: {
+    helpTitle: {
         fontSize: 18,
-        color: '#1F2937',
-        fontFamily: 'Inter_700Bold',
+        color: '#111827',
+        fontFamily: 'Inter-Bold',
         marginBottom: 16,
     },
     faqItem: {
         marginBottom: 20,
-        padding: 16,
-        backgroundColor: '#F9FAFB',
-        borderRadius: 12,
+        paddingBottom: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F4F6',
     },
     faqQuestion: {
         fontSize: 16,
-        color: '#1F2937',
-        fontFamily: 'Inter_600SemiBold',
+        color: '#111827',
+        fontFamily: 'Inter-SemiBold',
         marginBottom: 8,
     },
     faqAnswer: {
         fontSize: 14,
-        color: '#6B7280',
-        fontFamily: 'Inter_400Regular',
+        color: NEUTRAL_GRAY,
+        fontFamily: 'Inter-Regular',
         lineHeight: 20,
     },
-    supportContact: {
+    supportButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 16,
-        backgroundColor: '#F9FAFB',
-        borderRadius: 12,
-        marginBottom: 12,
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F4F6',
     },
-    supportIcon: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: `${PURPLE}20`,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 16,
-    },
-    supportInfo: {
-        flex: 1,
-    },
-    supportTitle: {
+    supportButtonText: {
         fontSize: 16,
-        color: '#1F2937',
-        fontFamily: 'Inter_600SemiBold',
-        marginBottom: 4,
+        color: '#111827',
+        fontFamily: 'Inter-Medium',
+        marginLeft: 12,
     },
-    supportValue: {
-        fontSize: 14,
-        color: '#6B7280',
-        fontFamily: 'Inter_400Regular',
-    },
-    downloadButton: {
-        backgroundColor: PURPLE,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 16,
+    // Общие кнопки
+    saveButton: {
+        backgroundColor: PRIMARY_PURPLE,
+        padding: 18,
         borderRadius: 12,
+        alignItems: 'center',
+        marginTop: 20,
     },
-    downloadButtonText: {
+    saveButtonText: {
         fontSize: 16,
         color: '#FFFFFF',
-        fontFamily: 'Inter_600SemiBold',
-        marginLeft: 8,
+        fontFamily: 'Inter-SemiBold',
     },
-    // Остальные стили как были ранее...
-    // Добавьте остальные стили из предыдущего кода...
-    // ...
 });
