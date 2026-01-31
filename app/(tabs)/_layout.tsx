@@ -63,7 +63,7 @@ export default function TabsLayout() {
                 title: '',
                 tabBarIcon: ({color, focused}) =>(
                     <Ionicons
-                        name={focused ? 'calendar-sharp' : 'calendar-outline'}
+                        name={focused ? 'people-sharp' : 'people-outline'}
                         color={color}
                         size={28}
                     />
@@ -73,7 +73,17 @@ export default function TabsLayout() {
                 title: '',
                 tabBarIcon: ({color, focused}) =>(
                     <Ionicons
-                        name={focused ? 'school-sharp' : 'school-outline'}
+                        name={focused ? 'bulb-sharp' : 'bulb-outline'}
+                        color={color}
+                        size={28}
+                    />
+                )
+            }}/>
+            <Tabs.Screen name="goals" options={{
+                title: '',
+                tabBarIcon: ({color, focused}) =>(
+                    <Ionicons
+                        name={focused ? 'calendar-sharp' : 'calendar-outline'}
                         color={color}
                         size={28}
                     />

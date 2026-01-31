@@ -16,9 +16,7 @@ import {
 import {
     Ionicons,
     MaterialIcons,
-    FontAwesome5,
     Feather,
-    AntDesign,
     MaterialCommunityIcons,
 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -460,6 +458,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#FAFAFA',
     },
     header: {
+        marginTop: 10,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
