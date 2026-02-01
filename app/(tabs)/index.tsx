@@ -21,10 +21,10 @@ const { width: screenWidth } = Dimensions.get('window');
 
 // Градиенты для разных элементов
 const GRADIENTS = {
-    primary: [Colors.light.primary, Colors.light.secondary],
-    blue: [Colors.light.info, '#60A5FA'],
-    green: [Colors.light.success, '#34D399'],
-    orange: [Colors.light.warning, '#FBBF24']
+    primary: [Colors.light.primary, Colors.light.secondary] as const,
+    blue: [Colors.light.info, '#60A5FA'] as const,
+    green: [Colors.light.success, '#34D399']  as const,
+    orange: [Colors.light.warning, '#FBBF24']  as const
 };
 
 export default function HomeScreen() {
@@ -98,31 +98,31 @@ export default function HomeScreen() {
         {
             title: '🏆 Цифровые Шаныраки',
             description: 'Рейтинг команд и подача отчетов',
-            route: '/shanyraks',
+            route: '/(tabs)/shanyraks',
             icon: 'trophy',
             gradient: GRADIENTS.primary
         },
         {
             title: '📅 Event Management',
             description: 'Расписание и бронирование локаций',
-            route: '/events',
+            route: '/(tabs)/events',
             icon: 'calendar-alt',
             gradient: GRADIENTS.blue
         },
         {
             title: '🎯 Проекты и Олимпиады',
             description: 'Команды и конкурсы',
-            route: '/projects',
+            route: '/(tabs)/projects',
             icon: 'lightbulb',
             gradient: GRADIENTS.green
         },
         {
             title: '📊 Личный прогресс',
             description: 'Цели и достижения',
-            route: '/goals',
+            route: '/(tabs)/goals',
             icon: 'chart-line',
             gradient: GRADIENTS.orange
-        },
+        }
     ];
 
     const recentActivities = [
@@ -367,9 +367,7 @@ export default function HomeScreen() {
             {/* Верхняя панель */}
             <View style={styles.header}>
                 <View>
-                    <Text style={styles.greeting}>Добро пожаловать,</Text>
-                    <Text style={styles.userName}>Айсултан! 👋</Text>
-                    <Text style={styles.userRole}>Старший префект</Text>
+                    <Text style={styles.greeting}>Добро пожаловать!</Text>
                 </View>
                 <TouchableOpacity
                     style={styles.profileButton}
@@ -409,7 +407,6 @@ export default function HomeScreen() {
                     </ScrollView>
                 </View>
 
-                {/* Основные разделы */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>🚀 Основные разделы</Text>
                     <View style={styles.actionsGrid}>
@@ -552,11 +549,6 @@ const styles = StyleSheet.create({
         borderBottomColor: Colors.light.neutral[200],
     },
     greeting: {
-        fontSize: Typography.caption.fontSize,
-        color: Colors.light.neutral[500],
-        marginBottom: Spacing.xs,
-    },
-    userName: {
         fontSize: Typography.headline.fontSize,
         color: Colors.light.neutral[900],
         fontWeight: Typography.headline.fontWeight,

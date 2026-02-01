@@ -413,6 +413,8 @@ export default function Goals() {
                     Мои цели
                 </Text>
             </TouchableOpacity>
+
+
         </View>
     );
 

@@ -89,6 +89,12 @@ export default function TabsLayout() {
                     />
                 )
             }}/>
+            <Tabs.Screen
+                name="search-team/searchTeam"
+                options={{
+                    href: null,
+                }}
+            />
         </Tabs>
     );
 }

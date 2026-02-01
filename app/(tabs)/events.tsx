@@ -21,6 +21,7 @@ import {
     AntDesign,
     MaterialCommunityIcons,
 } from '@expo/vector-icons';
+import {router} from "expo-router";
 
 const { width } = Dimensions.get('window');
 
@@ -409,7 +410,8 @@ const ProjectsScreen = () => {
                             ))}
                         </View>
 
-                        <TouchableOpacity style={styles.findTeamButton}>
+                        <TouchableOpacity style={styles.findTeamButton}
+                            onPress={() => {router.push("/(tabs)/search-team/searchTeam")}}>
                             <Text style={styles.findTeamButtonText}>Найти команду</Text>
                             <Feather name="users" size={18} color="#FFF" />
                         </TouchableOpacity>
